@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0da1b6">
+    <title>God Willing Sora Mois</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/0da1b6/ffffff?text=GW">
+    
+    <style>
+        :root {
+            --primary: #0da1b6;
+            --accent: #86e241;
+            --bg: #ffffff;
+            --text: #2c3e50;
+            --gray-light: #f8f9fa;
+            --shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Utilidades */
+        .hidden { display: none !important; }
+
+        /* Cabecera */
+        header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+        }
+
+        .greeting h1 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Zona Central */
+        .hero-card {
+            margin: 0 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: white;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .daily-prayer {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .daily-prayer h2 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .daily-prayer p {
+            font-style: italic;
+            color: #555;
+        }
+
+        /* Botones de Acción */
+        .actions-grid {
+            padding: 20px;
+            display: grid;
+            gap: 15px;
+        }
+
+        .btn-action {
+            padding: 18px;
+            border-radius: 15px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-action:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { 
+            background: white; 
+            color: var(--text); 
+            border: 2px solid var(--accent); 
+        }
+
+        /* Widget Compacto */
+        .widget {
+            margin: 10px 20px 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0da1b6 0%, #86e241 100%);
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(13, 161, 182, 0.2);
+        }
+
+        .widget p { font-weight: 500; font-size: 0.95rem; }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-content h3 { color: var(--primary); margin-bottom: 15px; }
+
+        input[type="text"], input[type="time"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        main { animation: fadeIn 0.8s ease-out; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Modal Configuración Inicial -->
+    <div id="setup-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Bienvenido</h3>
+            <p>Personaliza tu experiencia de paz.</p>
+            <input type="text" id="user-name-input" placeholder="Tu nombre">
+            <p style="margin-top:15px; font-size: 0.9rem;">¿A qué hora quieres un recordatorio?</p>
+            <input type="time" id="reminder-time">
+            <button class="btn-action btn-primary" style="width:100%; margin-top:15px;" onclick="saveSetup()">Empezar</button>
+        </div>
+    </div>
+
+    <!-- Modal Contenido -->
+    <div id="content-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-title">Título</h3>
+            <p id="modal-body" style="margin-bottom: 20px; white-space: pre-line;"></p>
+            <button class="btn-action btn-outline" style="width:100%" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="greeting">
+            <p style="font-size: 0.8rem; color: #888;">Bienvenido de vuelta,</p>
+            <h1 id="display-name">¡Hola!</h1>
+        </div>
+        <div class="logo-placeholder">GW</div>
+    </header>
+
+    <main>
+        <section class="hero-card">
+            <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=800&q=80" alt="Mindfulness" class="hero-image">
+            <div class="daily-prayer">
+                <h2>Oración de Atención</h2>
+                <p>"Señor, en el silencio de este día, vengo a pedirte paz, sabiduría y fortaleza."</p>
+            </div>
+        </section>
+
+        <section class="actions-grid">
+            <button class="btn-action btn-primary" onclick="showContent('prayer')">Oración</button>
+            <button class="btn-action btn-outline" onclick="showContent('intention')">Intención del Día</button>
+            <button class="btn-action btn-outline" onclick="showContent('exam')">Examen de Conciencia</button>
+        </section>
+
+        <section class="widget">
+            <p>"Recuerda que eres un hijo amadísimo de Dios y estás llamado a estar unido a Él en tu rutina diaria."</p>
+        </section>
+    </main>
+
+    <script>
+        // Lógica de Datos
+        const contents = {
+            prayer: {
+                title: "Oración del Día",
+                text: "Gracias Padre por este momento. Me pongo en tus manos para que mi jornada sea reflejo de tu amor. Guía mis pasos y purifica mi corazón."
+            },
+            intention: {
+                title: "Mi Intención",
+                text: "Hoy me propongo: \n1. Realizar mis tareas con alegría.\n2. Ser paciente con los demás.\n3. Dedicar un minuto de silencio cada hora."
+            },
+            exam: {
+                title: "Examen de Conciencia",
+                text: "¿He sido agradecido hoy?\n¿He tratado a los demás con caridad?\n¿He buscado a Dios en mis actividades?"
+            }
+        };
+
+        // Inicialización
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUser();
+            requestNotificationPermission();
+            startNotificationTimer();
+        });
+
+        function checkUser() {
+            const name = localStorage.getItem('gw_name');
+            if (!name) {
+                document.getElementById('setup-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('display-name').innerText = `¡Hola, ${name}!`;
+            }
+        }
+
+        function saveSetup() {
+            const name = document.getElementById('user-name-input').value;
+            const time = document.getElementById('reminder-time').value;
+            
+            if (name) {
+                localStorage.setItem('gw_name', name);
+                localStorage.setItem('gw_time', time);
+                document.getElementById('setup-modal').classList.add('hidden');
+                checkUser();
+            }
+        }
+
+        function showContent(type) {
+            const modal = document.getElementById('content-modal');
+            document.getElementById('modal-title').innerText = contents[type].title;
+            document.getElementById('modal-body').innerText = contents[type].text;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('content-modal').classList.add('hidden');
+        }
+
+        // Lógica de Notificaciones
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        }
+
+        function startNotificationTimer() {
+            setInterval(() => {
+                const scheduledTime = localStorage.getItem('gw_time');
+                if (!scheduledTime) return;
+
+                const now = new Date();
+                const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                if (currentTime === scheduledTime) {
+                    sendNotification();
+                }
+            }, 60000); // Revisa cada minuto
+        }
+
+        function sendNotification() {
+            if (Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("God Willing Sora Mois", {
+                        body: "Recuerda que eres un hijo amadísimo de Dios. Es momento de una pausa.",
+                        icon: "https://via.placeholder.com/192/0da1b6/ffffff?text=GW"
+                    });
+                });
+            }
+        }
+
+        // Registro del Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("SW registrado"))
+                .catch(err => console.log("Error SW", err));
+        }
+    </script>
+</body>
+</html>
