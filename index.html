@@ -291,9 +291,11 @@
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
                 // Pintar los datos en pantalla
-                const photoEl = document.getElementById('main-inspiration-photo');
-photoEl.src = datosHoy.imagen;
-photoEl.style.display = 'block'; // Asegura que se muestre al cambiar de día
+                const fotoCentral = document.getElementById('main-inspiration-photo');
+fotoCentral.src = datosHoy.imagen;
+fotoCentral.style.display = 'block'; // <-- ¡ESTA es la línea mágica que nos faltaba!
+
+document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
                 document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
                 document.getElementById('content-oracion').innerHTML = "<strong>Palabra de Dios reflexionada:</strong><br>" + datosHoy.desplegable;
                 document.getElementById('content-intencion').innerHTML = "<strong>Tu acto de atención sugerido:</strong><br>" + datosHoy.intencion;
