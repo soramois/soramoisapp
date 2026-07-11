@@ -1,0 +1,219 @@
+[
+  {
+    "id": 1,
+    "imagen": "https://images.unsplash.com/photo-1470252649358-96f3c8024252?q=80&w=600&auto=format&fit=cover",
+    "central": "«Permanezcan en mí, y yo en ustedes.»<br><small>(Juan 15,4)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Nada da fruto separado de Cristo. Antes de cada tarea, vuelve interiormente a Él y hazla en su presencia.",
+    "intencion": "Jesús, que permanezca unido a Ti en todo lo que haga hoy."
+  },
+  {
+    "id": 2,
+    "imagen": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=cover",
+    "central": "«Estad quietos y reconoced que yo soy Dios.»<br><small>(Salmo 46,10)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> En el silencio, Dios habla al corazón. Detente unos instantes y recuerda que Él está contigo.",
+    "intencion": "Señor, aquieta mi alma para reconocer tu presencia."
+  },
+  {
+    "id": 3,
+    "imagen": "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=600&auto=format&fit=cover",
+    "central": "«Aprended de mí, que soy manso y humilde de corazón.»<br><small>(Mateo 11,29)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La verdadera grandeza nace de un corazón humilde, capaz de amar y servir.",
+    "intencion": "Jesús, forma en mí un corazón semejante al tuyo."
+  },
+  {
+    "id": 4,
+    "imagen": "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=600&auto=format&fit=cover",
+    "central": "«Venid a mí todos los que estáis cansados y agobiados, y yo os aliviaré.»<br><small>(Mateo 11,28)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> No cargues solo con tus preocupaciones. Cristo desea llevarlas contigo.",
+    "intencion": "Jesús, pongo en tus manos todo lo que hoy pesa sobre mí."
+  },
+  {
+    "id": 5,
+    "imagen": "https://images.unsplash.com/photo-1433832597046-4f10e10ac764?q=80&w=600&auto=format&fit=cover",
+    "central": "«Buscad primero el Reino de Dios y su justicia.»<br><small>(Mateo 6,33)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Cuando Dios ocupa el primer lugar, todo lo demás encuentra su justo orden.",
+    "intencion": "Señor, que hoy busque tu voluntad antes que la mía."
+  },
+  {
+    "id": 6,
+    "imagen": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=cover",
+    "central": "«El Señor es mi luz y mi salvación, ¿a quién temeré?»<br><small>(Salmo 27,1)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La confianza en Dios disipa el miedo y fortalece el corazón.",
+    "intencion": "Señor, camino contigo y no quiero vivir dominado por el temor."
+  },
+  {
+    "id": 7,
+    "imagen": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=600&auto=format&fit=cover",
+    "central": "«La paz os dejo; mi paz os doy.»<br><small>(Juan 14,27)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La paz de Cristo no depende de las circunstancias, sino de su presencia.",
+    "intencion": "Jesús, que tu paz gobierne mi corazón."
+  },
+  {
+    "id": 8,
+    "imagen": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=600&auto=format&fit=cover",
+    "central": "«Confía en el Señor de todo corazón y no te apoyes en tu propia inteligencia.»<br><small>(Proverbios 3,5)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> No siempre comprenderás el camino, pero siempre puedes confiar en quien lo guía.",
+    "intencion": "Señor, hoy quiero caminar apoyado en tu sabiduría."
+  },
+  {
+    "id": 9,
+    "imagen": "https://images.unsplash.com/photo-1472214222541-d510753a4907?q=80&w=600&auto=format&fit=cover",
+    "central": "«Yo soy el camino, la verdad y la vida.»<br><small>(Juan 14,6)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Seguir a Cristo es encontrar la dirección que conduce al Padre.",
+    "intencion": "Jesús, guía mis pasos por tu camino."
+  },
+  {
+    "id": 10,
+    "imagen": "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=600&auto=format&fit=cover",
+    "central": "«El que permanece en mí da mucho fruto.»<br><small>(Juan 15,5)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La fecundidad nace de la unión con Cristo, no solo del esfuerzo.",
+    "intencion": "Jesús, haz fecundos mis actos en Ti."
+  },
+  {
+    "id": 11,
+    "imagen": "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?q=80&w=600&auto=format&fit=cover",
+    "central": "«Permaneced en mi amor.»<br><small>(Juan 15,9)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Vivir en el amor de Cristo transforma la manera de mirar, hablar y actuar.",
+    "intencion": "Señor, que hoy no salga de tu amor."
+  },
+  {
+    "id": 12,
+    "imagen": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=600&auto=format&fit=cover",
+    "central": "«Si me amáis, guardaréis mis mandamientos.»<br><small>(Juan 14,15)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> El amor verdadero se expresa en la fidelidad.",
+    "intencion": "Jesús, que mi amor por Ti se vea en mis obras."
+  },
+  {
+    "id": 13,
+    "imagen": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=600&auto=format&fit=cover",
+    "central": "«El que quiera seguirme, que tome su cruz cada día.»<br><small>(Lucas 9,23)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La cruz aceptada con amor se convierte en camino de vida.",
+    "intencion": "Jesús, dame fuerza para seguirte con fidelidad."
+  },
+  {
+    "id": 14,
+    "imagen": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=600&auto=format&fit=cover",
+    "central": "«Velad y orad.»<br><small>(Mateo 26,41)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Un corazón vigilante descubre la acción de Dios en lo cotidiano.",
+    "intencion": "Señor, mantén despierto mi corazón."
+  },
+  {
+    "id": 15,
+    "imagen": "https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=600&auto=format&fit=cover",
+    "central": "«Lo que hicisteis a uno de estos pequeños, a mí me lo hicisteis.»<br><small>(Mateo 25,40)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Cada persona es una oportunidad para amar a Cristo.",
+    "intencion": "Jesús, ayúdame a reconnaiscerte en quienes encuentre hoy."
+  },
+  {
+    "id": 16,
+    "imagen": "https://images.unsplash.com/photo-1510784722466-f2aa9c52fff6?q=80&w=600&auto=format&fit=cover",
+    "central": "«Dad y se os dará.»<br><small>(Lucas 6,38)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> El corazón que se entrega nunca queda vacío.",
+    "intencion": "Señor, enséñame a dar con generosidad."
+  },
+  {
+    "id": 17,
+    "imagen": "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?q=80&w=600&auto=format&fit=cover",
+    "central": "«Perdonad y seréis perdonados.»<br><small>(Lucas 6,37)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Perdonar libera primero a quien perdona.",
+    "intencion": "Jesús, enséñame a perdonar como Tú perdonas."
+  },
+  {
+    "id": 18,
+    "imagen": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=cover",
+    "central": "«Amad a vuestros enemigos.»<br><small>(Mateo 5,44)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> El amor cristiano alcanza incluso a quien no nos comprende.",
+    "intencion": "Señor, dame un corazón que ame sin condiciones."
+  },
+  {
+    "id": 19,
+    "imagen": "https://images.unsplash.com/photo-1444464666168-49d633b867df?q=80&w=600&auto=format&fit=cover",
+    "central": "«Sed misericordiosos como vuestro Padre es misericordioso.»<br><small>(Lucas 6,36)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La misericordia refleja el rostro de Dios.",
+    "intencion": "Padre, que hoy trate a todos con misericordia."
+  },
+  {
+    "id": 20,
+    "imagen": "https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?q=80&w=600&auto=format&fit=cover",
+    "central": "«Mi yugo es suave y mi carga ligera.»<br><small>(Mateo 11,30)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Con Cristo, incluso las dificultades pueden vivirse con esperanza.",
+    "intencion": "Jesús, ayúdame a llevar contigo la carga de este día."
+  },
+  {
+    "id": 21,
+    "imagen": "https://images.unsplash.com/photo-1494548162494-384bba4ab999?q=80&w=600&auto=format&fit=cover",
+    "central": "«El que cree en mí, aunque muera, vivirá.»<br><small>(Juan 11,25)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La esperanza cristiana vence incluso a la muerte.",
+    "intencion": "Jesús, aumenta mi confianza en la vida eterna."
+  },
+  {
+    "id": 22,
+    "imagen": "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=600&auto=format&fit=cover",
+    "central": "«He venido para que tengan vida y la tengan en abundancia.»<br><small>(Juan 10,10)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Cristo no quita nada; llena de sentido la vida.",
+    "intencion": "Señor, que viva plenamente unido a Ti."
+  },
+  {
+    "id": 23,
+    "imagen": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=600&auto=format&fit=cover",
+    "central": "«Yo estoy con vosotros todos los días.»<br><small>(Mateo 28,20)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Nunca caminas solo.",
+    "intencion": "Jesús, hazme consciente de tu compañía."
+  },
+  {
+    "id": 24,
+    "imagen": "https://images.unsplash.com/photo-1505833542244-25950fc0ae74?q=80&w=600&auto=format&fit=cover",
+    "central": "«Todo lo que pidáis al Padre en mi nombre os lo dará.»<br><small>(Juan 16,23)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La oración confiada abre el corazón a la acción de Dios.",
+    "intencion": "Padre, pongo hoy toda mi confianza en Ti."
+  },
+  {
+    "id": 25,
+    "imagen": "https://images.unsplash.com/photo-1426604966848-d7adac402bff?q=80&w=600&auto=format&fit=cover",
+    "central": "«El cielo y la tierra pasarán, pero mis palabras no pasarán.»<br><small>(Mateo 24,35)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La Palabra de Dios permanece firme cuando todo cambia.",
+    "intencion": "Señor, que tu Palabra sea el fundamento de mi vida."
+  },
+  {
+    "id": 26,
+    "imagen": "https://images.unsplash.com/photo-1434064511983-18c6dae20ed5?q=80&w=600&auto=format&fit=cover",
+    "central": "«No juzguéis y no seréis juzgados.»<br><small>(Lucas 6,37)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Solo Dios conoce el corazón de cada persona.",
+    "intencion": "Jesús, enséñame a mirar con caridad."
+  },
+  {
+    "id": 27,
+    "imagen": "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=600&auto=format&fit=cover",
+    "central": "«Encomienda al Señor tu camino; confía en Él, y Él actuará.»<br><small>(Salmo 37,5)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Cuando entregas a Dios tus planes y preocupaciones, dejas espacio para que Él obre con su sabiduría y su tiempo.",
+    "intencion": "Señor, pongo mi vida y este día en tus manos; confío en que Tú actuarás."
+  },
+  {
+    "id": 28,
+    "imagen": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=600&auto=format&fit=cover",
+    "central": "«Tened valor: yo he vencido al mundo.»<br><small>(Juan 16,33)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Cristo ya ha vencido el pecado y la muerte. En Él, la esperanza nunca defrauda.",
+    "intencion": "Jesús, que hoy viva con la confianza de quien sabe que Tú has vencido."
+  },
+  {
+    "id": 29,
+    "imagen": "https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=600&auto=format&fit=cover",
+    "central": "«Lámpara es tu palabra para mis pasos, luz en mi sendero.»<br><small>(Salmo 119,105)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> Dios no siempre muestra todo el camino, pero nunca deja sin luz el siguiente paso.",
+    "intencion": "Señor, ilumina mis decisiones con tu Palabra."
+  },
+  {
+    "id": 30,
+    "imagen": "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=600&auto=format&fit=cover",
+    "central": "«Padre, no se haga mi voluntad, sino la tuya.»<br><small>(Lucas 22,42)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La verdadera libertad nace cuando acogemos con amor la voluntad del Padre, incluso en la dificultad.",
+    "intencion": "Padre, uno mi voluntad a la tuya en todo lo que viva hoy."
+  },
+  {
+    "id": 31,
+    "imagen": "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?q=80&w=600&auto=format&fit=cover",
+    "central": "«Amaos unos a otros como yo os he amado.»<br><small>(Juan 15,12)</small>",
+    "desplegable": "<strong>Luz para hoy:</strong> La medida del amor cristiano no es nuestro esfuerzo, sino el amor de Cristo entregado hasta el extremo.",
+    "intencion": "Jesús, ama en mí y a través de mí a cada persona que encuentre hoy."
+  }
+]
