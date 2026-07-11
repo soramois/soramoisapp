@@ -248,53 +248,13 @@
             <strong>Examen de Conciencia rápido al terminar el día:</strong><br> 
             1. ¿He recordado la presencia de Dios en mis ocupaciones?<br>
             2. ¿He respondido con amor y paciencia a quienes me rodearon?<br>
-            3. ¿Hubo egoísmo, queja o soberbia en mis acciones?<br>
+            3. ¿Hubo egoísmo, queja o soberbia en mis actions?<br>
             <em>Pide perdón con confianza: "Señor, tú lo sabes todo, tú sabes que te quiero. Mañana lo haré mejor con tu gracia."</em>
         </div>
     </div>
 </div>
 
 <script>
-    // Base de datos de oraciones por día de la semana (0 = Domingo, 1 = Lunes, etc.)
-    const baseOraciones = {
-        0: {
-            central: "\"Señor, en este día de descanso, renuevo mi paz en Ti. Que logre contemplar tu amor en las cosas pequeñas y en mi familia.\"",
-            desplegable: "<strong>Oración dominical:</strong> Padre bueno, gracias por el don de la vida y de la fe. Hoy descanso en tus brazos. Aparta de mí las preocupaciones del mañana y enséñame a vivir en tu santa presencia hoy. Amén.",
-            intencion: "Disfrutar del descanso sin prisas, ser sembrador de alegría en el hogar y agradecer a Dios por la semana transcurrida."
-        },
-        1: {
-            central: "\"Comienzo esta semana en tu Nombre, Padre. Que mi rutina y mis tareas de hoy sean mi mejor forma de alabarte.\"",
-            desplegable: "<strong>Oración para el lunes:</strong> Señor Jesús, te ofrezco mis manos, mi mente y mi cansancio en este inicio de semana. Que cada palabra mía refleje tu bondad y que trabaje con honestidad y esmero. Amén.",
-            intencion: "Aceptar los contratiempos del inicio de semana con paciencia y realizar mis obligaciones con una sonrisa."
-        },
-        2: {
-            central: "\"Jesús, dame un corazón humilde y atento para descubrir tu rostro escondido en las personas que cruces hoy en mi camino.\"",
-            desplegable: "<strong>Oración para el martes:</strong> Señor, hazme un instrumento de tu paz. Que no busque tanto ser comprendido como comprender, ni ser amado como amar. Dame la gracia de servir con alegría. Amén.",
-            intencion: "Escuchar con atención a quien me hable hoy, evitando la impaciencia y las críticas."
-        },
-        3: {
-            central: "\"Espíritu Santo, sopla sobre mí en esta mitad de la jornada. Inspira mis decisiones y mantén mi alma unida al Padre.\"",
-            desplegable: "<strong>Oración para el miércoles:</strong> Ven, Espíritu Santo, llena los corazones de tus fieles. Dame sabiduría para elegir lo correcto, fortaleza para vencer la pereza y templanza en mis palabras. Amén.",
-            intencion: "Detener el trabajo un minuto a mitad del día para ofrecerle a Dios lo que estoy haciendo."
-        },
-        4: {
-            central: "\"Gracias, Señor, por tu presencia constante y real en mi vida. Sé que nunca camino solo ni desamparado.\"",
-            desplegable: "<strong>Oración para el jueves:</strong> Señor sacramentado, qué bien se está a tu lado. Aumenta mi fe, fortalece mi esperanza y enciende mi caridad. Que sepa ser sagrario vivo para los demás hoy. Amén.",
-            intencion: "Hacer un acto de fe y amor interno en un momento de dificultad, diciendo: 'Jesús, confío en Ti'."
-        },
-        5: {
-            central: "\"Padre, uno las dificultades y esfuerzos de este viernes al amor redentor de tu Hijo Jesús. Todo es por Ti.\"",
-            desplegable: "<strong>Oración para el viernes:</strong> Jesús, por tu cruz y tu resurrección nos has salvado. Enséñame a abrazar mis pequeñas cruces cotidianas sin quejarme y a compartirlas contigo, que alivias mis cargas. Amén.",
-            intencion: "Ofrecer un pequeño sacrificio (evitar una queja, comer algo que no me encante) por las intenciones del prójimo."
-        },
-        6: {
-            central: "\"María, Madre mía, acompáñame en esta jornada. Enséñame a guardar todas las cosas meditándolas en el corazón.\"",
-            desplegable: "<strong>Oración para el sábado:</strong> Santa María, Madre del amor hermoso, quédate a mi lado hoy. Enséñame a decirle que 'Sí' al Señor en la rutina, con la misma confianza y entrega que tú tuviste. Amén.",
-            intencion: "Dedicar unos minutos a ordenar mi espacio exterior e interior, y tener un gesto de cariño especial con alguien."
-        }
-    };
-
-    <script>
     let listaHoras = [];
 
     window.onload = function() {
@@ -316,27 +276,21 @@
         fetch('oraciones.json')
             .then(res => res.json())
             .then(oraciones => {
-                // Obtener el historial de IDs leídos del teléfono
                 let historial = JSON.parse(localStorage.getItem('app_historial_oraciones') || '[]');
-                
-                // Filtrar las oraciones que NO se han mostrado todavía
                 let disponibles = oraciones.filter(o => !historial.includes(o.id));
                 
-                // Si ya salieron las 31, reiniciamos el historial para empezar un ciclo nuevo
                 if (disponibles.length === 0) {
                     historial = [];
                     disponibles = oraciones;
                 }
                 
-                // Seleccionar una al azar de las que quedan libres
                 const indiceAleatorio = Math.floor(Math.random() * disponibles.length);
                 const datosHoy = disponibles[indiceAleatorio];
                 
-                // Guardar esta oración en el historial
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar los datos reales en la pantalla
+                // Pintar los datos en pantalla
                 document.querySelector('.inspiration-img').src = datosHoy.imagen;
                 document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
                 document.getElementById('content-oracion').innerHTML = "<strong>Palabra de Dios reflexionada:</strong><br>" + datosHoy.desplegable;
@@ -368,7 +322,7 @@
         }, 30000);
     }
 
-    // Funciones de control de la pantalla (¡No las borres!)
+    // Funciones de control de la pantalla
     function addHourToList() {
         const timeInput = document.getElementById('reminder-time-input');
         const nuevaHora = timeInput.value;
