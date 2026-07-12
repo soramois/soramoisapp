@@ -60,9 +60,10 @@
             box-shadow: 0 4px 12px rgba(13, 161, 182, 0.3);
             border-left: 6px solid var(--verde-lima);
             line-height: 1.4;
+            font-style: italic;
         }
         .inspiration-card {
-            background: var(--gris-suave);
+            background: linear-gradient(to bottom, #e0f7fa, #f1f8e9);
             border-radius: 16px;
             overflow: hidden;
             margin-bottom: 20px;
@@ -72,6 +73,7 @@
             width: 100%;
             height: 160px;
             object-fit: cover;
+            display: block;
         }
         .prayer-day {
             padding: 15px;
@@ -195,7 +197,7 @@
 <body>
 
 <div class="app-container">
-    <!-- Configuración Inicial / Modificable -->
+    <!-- Configuración Inicial -->
     <div id="config-box" class="config-section">
         <strong>⚙️ Configuración del espacio:</strong>
         <input type="text" id="username-input" placeholder="Tu nombre">
@@ -221,36 +223,33 @@
         </div>
     </div>
 
-    <!-- Widget Compacto Fijo -->
-    <div class="widget-compacto">
-        "Recuerda que eres un hijo amadísimo de Dios y estás llamado a estar unido a Él en tu rutina diaria."
+    <!-- Llamada Dinámica Superior -->
+    <div class="widget-compacto" id="text-llamada">
+        "Cargando presencia divina..."
     </div>
 
-    <!-- Zona Central Inspiración (Amanecer / Luz) -->
-    <div class="inspiration-card" style="background: linear-gradient(to bottom, #e0f7fa, #f1f8e9);">
-    <img id="main-inspiration-photo" src="https://images.unsplash.com/photo-1470252649358-96f3c8024252?q=80&w=600&auto=format&fit=cover" class="inspiration-img" alt="Espacio de Luz" onerror="this.style.display='none'">
-    <div class="prayer-day">
-        <strong>Oración de atención del día:</strong><br>
-        <span id="text-oracion-central">Cargando la oración del día...</span>
+    <!-- Zona Central Inspiración (Amanecer / Cita Bíblica) -->
+    <div class="inspiration-card">
+        <img id="main-inspiration-photo" src="https://images.unsplash.com/photo-1470252649358-96f3c8024252?q=80&w=600&auto=format&fit=cover" class="inspiration-img" alt="Espacio de Luz">
+        <div class="prayer-day">
+            <strong>Palabra de Vida Eterna:</strong><br><br>
+            <span id="text-oracion-central">Cargando Palabra...</span>
+        </div>
     </div>
-</div>
 
-    <!-- Botones de Acción -->
+    <!-- Botones de Acción Estructurados según Word -->
     <div class="buttons-grid">
+        <button class="action-btn" onclick="toggleContent('luz')">Luz para hoy <span>▼</span></button>
+        <div id="content-luz" class="content-display"></div>
+
         <button class="action-btn" onclick="toggleContent('oracion')">Oración <span>▼</span></button>
         <div id="content-oracion" class="content-display"></div>
 
-        <button class="action-btn" onclick="toggleContent('intencion')">Intención del Día <span>▼</span></button>
-        <div id="content-intencion" class="content-display"></div>
+        <button class="action-btn" onclick="toggleContent('examen')">Examen <span>▼</span></button>
+        <div id="content-examen" class="content-display"></div>
 
-        <button class="action-btn" onclick="toggleContent('examen')">Qué podía haber mejorado hoy (Examen) <span>▼</span></button>
-        <div id="content-examen" class="content-display">
-            <strong>Examen de Conciencia rápido al terminar el día:</strong><br> 
-            1. ¿He recordado la presencia de Dios en mis ocupaciones?<br>
-            2. ¿He respondido con amor y paciencia a quienes me rodearon?<br>
-            3. ¿Hubo egoísmo, queja o soberbia en mis actions?<br>
-            <em>Pide perdón con confianza: "Señor, tú lo sabes todo, tú sabes que te quiero. Mañana lo haré mejor con tu gracia."</em>
-        </div>
+        <button class="action-btn" onclick="toggleContent('intencion')">Intención <span>▼</span></button>
+        <div id="content-intencion" class="content-display"></div>
     </div>
 </div>
 
@@ -258,22 +257,22 @@
     let listaHoras = [];
 
     window.onload = function() {
-        // 1. Cargar Nombre del usuario
+        // 1. Cargar Nombre
         const savedName = localStorage.getItem('app_user_name');
         if(savedName) {
             document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
             document.getElementById('config-box').style.display = 'none';
         }
         
-        // 2. Cargar Horas programadas
+        // 2. Cargar Horas
         const savedHours = localStorage.getItem('app_user_hours');
         if(savedHours) {
             listaHoras = JSON.parse(savedHours);
             renderHoursTags();
         }
 
-        // 3. Cargar el archivo JSON de oraciones y elegir una aleatoria sin repetición
-        fetch('oraciones.json')
+        // 3. Cargar el archivo JSON de forma segura (40 días sin repetición)
+        fetch('./oraciones.json')
             .then(res => res.json())
             .then(oraciones => {
                 let historial = JSON.parse(localStorage.getItem('app_historial_oraciones') || '[]');
@@ -290,19 +289,23 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar los datos en pantalla
+                // Pintar los datos dinámicos del Word en la Pantalla
+                document.getElementById('text-llamada').innerHTML = `"${datosHoy.llamada}"`;
+                
                 const fotoCentral = document.getElementById('main-inspiration-photo');
-fotoCentral.src = datosHoy.imagen;
-fotoCentral.style.display = 'block'; // <-- ¡ESTA es la línea mágica que nos faltaba!
+                fotoCentral.src = datosHoy.imagen;
+                fotoCentral.style.display = 'block';
 
-document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
-                document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
-                document.getElementById('content-oracion').innerHTML = "<strong>Palabra de Dios reflexionada:</strong><br>" + datosHoy.desplegable;
-                document.getElementById('content-intencion').innerHTML = "<strong>Tu acto de atención sugerido:</strong><br>" + datosHoy.intencion;
+                document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra;
+                document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + datosHoy.luz;
+                document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + datosHoy.oracion;
+                document.getElementById('content-examen').innerHTML = "<strong>Examen:</strong><br>" + datosHoy.examen;
+                document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + datosHoy.intencion;
             })
             .catch(err => {
                 console.error("Error cargando las oraciones: ", err);
-                document.getElementById('text-oracion-central').innerText = "«Permanezcan en mí, y yo en ustedes.» (Juan 15,4)";
+                document.getElementById('text-llamada').innerText = "\"Te tengo abrazado. Sigamos juntos.\"";
+                document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
         // 4. Pedir permisos de notificación
@@ -310,7 +313,7 @@ document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
             Notification.requestPermission();
         }
 
-        // 5. Reloj de alarmas múltiples (revisa cada 30 segundos)
+        // 5. Reloj de alarmas
         setInterval(() => {
             if (listaHoras.length > 0) {
                 const ahora = new Date();
@@ -326,7 +329,6 @@ document.getElementById('text-oracion-central').innerHTML = datosHoy.central;
         }, 30000);
     }
 
-    // Funciones de control de la pantalla
     function addHourToList() {
         const timeInput = document.getElementById('reminder-time-input');
         const nuevaHora = timeInput.value;
