@@ -202,6 +202,9 @@
 </head>
 <body>
 
+<!-- Altavoz tradicional con audio real de campana de iglesia católica de Wikimedia -->
+<audio id="audio-campana" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Campana.mp3" preload="auto"></audio>
+
 <div class="app-container">
     <!-- Configuración Inicial -->
     <div id="config-box" class="config-section">
@@ -221,8 +224,8 @@
             <strong>🔔 Activar sonido de campana</strong>
         </label>
 
-        <!-- NUEVO: Botón para probar la campana en el acto -->
-        <button type="button" class="btn-test-sound" onclick="playSynthesizedChime()">🔊 Probar toque de campana ahora</button>
+        <!-- Botón para probar la campana en el acto -->
+        <button type="button" class="btn-test-sound" onclick="probarCampana()">🔊 Probar toque de campana ahora</button>
         
         <button class="btn-main-save" onclick="saveConfiguration()">Guardar y Comenzar</button>
     </div>
@@ -270,24 +273,23 @@
 
 <script>
     var listaHoras = [];
-    var audioCtx = null;
+    window.audioDesbloqueado = false;
 
-    function desbloquearAudioSistema() {
-        try {
-            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass && !audioCtx) {
-                audioCtx = new AudioContextClass();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        } catch (e) {
-            console.log("No se pudo iniciar el motor de audio:", e);
+    // Desbloqueo inicial silencioso al tocar la pantalla (crucial para móviles)
+    function desbloquearAudio() {
+        var sonido = document.getElementById('audio-campana');
+        if (sonido && !window.audioDesbloqueado) {
+            sonido.play().then(function() {
+                sonido.pause();
+                sonido.currentTime = 0;
+                window.audioDesbloqueado = true;
+            }).catch(function(e) {
+                console.log("Esperando interacción del usuario...", e);
+            });
         }
     }
-
-    window.onclick = function() { desbloquearAudioSistema(); };
-    window.ontouchstart = function() { desbloquearAudioSistema(); };
+    window.onclick = desbloquearAudio;
+    window.ontouchstart = desbloquearAudio;
 
     window.onload = function() {
         // 1. Cargar Nombre
@@ -310,7 +312,7 @@
             document.getElementById('sound-toggle').checked = (savedSound === 'true');
         }
 
-        // 3. Cargar el archivo JSON (40 días)[cite: 1]
+        // 3. Cargar el archivo JSON (40 días)
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
@@ -332,7 +334,7 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar datos[cite: 1]
+                // Pintar datos
                 document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
                 
                 var fotoCentral = document.getElementById('main-inspiration-photo');
@@ -409,6 +411,7 @@
         }
         localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
         
+        // Guardar estado del sonido
         var soundEnabled = document.getElementById('sound-toggle').checked;
         localStorage.setItem('app_user_sound', soundEnabled ? 'true' : 'false');
 
@@ -426,46 +429,27 @@
         }
     }
 
-    // Generador de Campana de Iglesia Católica - Optimizado a prueba de fallos
-    function playSynthesizedChime() {
-        try {
-            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass && !audioCtx) {
-                audioCtx = new AudioContextClass();
-            }
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            var ahora = audioCtx.currentTime;
-            var frecuencias = [110.00, 220.00, 261.63, 329.63, 440.00];
-            var ganancias = [0.35, 0.30, 0.22, 0.15, 0.10];
-            var duraciones = [4.5, 3.5, 3.0, 2.2, 1.2];
-
-            for (var i = 0; i < frecuencias.length; i++) {
-                var osc = audioCtx.createOscillator();
-                var gainNode = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(frecuencias[i], ahora);
-                
-                gainNode.gain.setValueAtTime(ganancias[i], ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, ahora + duraciones[i]);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start(ahora);
-                osc.stop(ahora + duraciones[i]);
-            }
-        } catch (e) {
-            console.log("Error tocando la campana:", e);
+    function probarCampana() {
+        var sonido = document.getElementById('audio-campana');
+        if (sonido) {
+            sonido.currentTime = 0;
+            sonido.play().catch(function(e) {
+                alert("Por favor, haz un clic previo en la pantalla para permitir el audio.");
+            });
         }
     }
 
     function showNotification() {
+        // Verificar la programación del interruptor de sonido
         var savedSound = localStorage.getItem('app_user_sound');
         if (savedSound === 'true' || savedSound === null) {
-            playSynthesizedChime();
+            var sonido = document.getElementById('audio-campana');
+            if (sonido) {
+                sonido.currentTime = 0;
+                sonido.play().catch(function(e) {
+                    console.log("Audio retenido por el navegador en segundo plano:", e);
+                });
+            }
         }
 
         if (Notification.permission === "granted") {
