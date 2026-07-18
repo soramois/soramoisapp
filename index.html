@@ -153,6 +153,12 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .hours-tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
+        }
         .hour-tag {
             background: var(--turquesa);
             color: white;
@@ -186,24 +192,25 @@
             cursor: pointer;
             color: var(--turquesa);
         }
-        .btn-test-sound {
-            background: #e0f2f1;
-            color: var(--turquesa);
-            border: 1px dashed var(--turquesa);
-            padding: 8px;
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
+        /* Estilos para el switch de sonido */
+        .sound-toggle-container {
+            margin: 15px 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-weight: bold;
-            margin-top: 10px;
-            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+        }
+        .sound-toggle-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--turquesa);
         }
     </style>
 </head>
 <body>
-
-<!-- Altavoz tradicional con audio real de campana de iglesia católica de Wikimedia -->
-<audio id="audio-campana" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Campana.mp3" preload="auto"></audio>
 
 <div class="app-container">
     <!-- Configuración Inicial -->
@@ -216,16 +223,13 @@
             <input type="time" id="reminder-time-input">
             <button type="button" onclick="addHourToList()">+</button>
         </div>
-        <div id="hours-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;"></div>
+        <div class="hours-tag-container" id="hours-tags"></div>
         
-        <!-- Opción programable para el sonido -->
-        <label style="display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 5px; cursor: pointer;">
-            <input type="checkbox" id="sound-toggle" checked style="width: auto; margin: 0;">
-            <strong>🔔 Activar sonido de campana</strong>
+        <!-- Opciones de Sonido -->
+        <label class="sound-toggle-container">
+            <input type="checkbox" id="sound-checkbox" checked>
+            🔔 Activar sonido de campana
         </label>
-
-        <!-- Botón para probar la campana en el acto -->
-        <button type="button" class="btn-test-sound" onclick="probarCampana()">🔊 Probar toque de campana ahora</button>
         
         <button class="btn-main-save" onclick="saveConfiguration()">Guardar y Comenzar</button>
     </div>
@@ -273,23 +277,26 @@
 
 <script>
     var listaHoras = [];
-    window.audioDesbloqueado = false;
+    var audioCtx = null;
 
-    // Desbloqueo inicial silencioso al tocar la pantalla (crucial para móviles)
-    function desbloquearAudio() {
-        var sonido = document.getElementById('audio-campana');
-        if (sonido && !window.audioDesbloqueado) {
-            sonido.play().then(function() {
-                sonido.pause();
-                sonido.currentTime = 0;
-                window.audioDesbloqueado = true;
-            }).catch(function(e) {
-                console.log("Esperando interacción del usuario...", e);
-            });
+    // Función segura para despertar el sistema de sonido mediante toque manual
+    function desbloquearAudioSistema() {
+        try {
+            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass && !audioCtx) {
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch (e) {
+            console.log("No se pudo iniciar el motor de audio:", e);
         }
     }
-    window.onclick = desbloquearAudio;
-    window.ontouchstart = desbloquearAudio;
+
+    // Escuchar cualquier toque en la pantalla para otorgar permisos de sonido
+    window.onclick = function() { desbloquearAudioSistema(); };
+    window.ontouchstart = function() { desbloquearAudioSistema(); };
 
     window.onload = function() {
         // 1. Cargar Nombre
@@ -306,13 +313,13 @@
             renderHoursTags();
         }
 
-        // 2b. Cargar preferencia del Sonido
-        var savedSound = localStorage.getItem('app_user_sound');
-        if (savedSound !== null) {
-            document.getElementById('sound-toggle').checked = (savedSound === 'true');
+        // 3. Cargar Preferencia de Sonido
+        var savedSound = localStorage.getItem('app_sound_enabled');
+        if(savedSound !== null) {
+            document.getElementById('sound-checkbox').checked = (savedSound === 'true');
         }
 
-        // 3. Cargar el archivo JSON (40 días)
+        // 4. Cargar el archivo JSON (40 días)
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
@@ -353,12 +360,12 @@
                 document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
-        // 4. Pedir permisos de notificación
+        // 5. Pedir permisos de notificación
         if (Notification.permission !== "granted" && Notification.permission !== "denied") {
             Notification.requestPermission();
         }
 
-        // 5. Reloj de alarmas (revisa cada 30 segundos)
+        // 6. Reloj de alarmas (revisa cada 30 segundos)
         setInterval(function() {
             if (listaHoras.length > 0) {
                 var ahora = new Date();
@@ -377,8 +384,8 @@
     }
 
     function addHourToList() {
-        var timeInput = document.getElementById('reminder-time-input');
-        var nuevaHora = timeInput.value;
+        const timeInput = document.getElementById('reminder-time-input');
+        const nuevaHora = timeInput.value;
         if(nuevaHora && listaHoras.indexOf(nuevaHora) === -1) {
             listaHoras.push(nuevaHora);
             listaHoras.sort();
@@ -393,10 +400,10 @@
     }
 
     function renderHoursTags() {
-        var container = document.getElementById('hours-tags');
+        const container = document.getElementById('hours-tags');
         container.innerHTML = "";
         listaHoras.forEach(function(hora, index) {
-            var tag = document.createElement('div');
+            const tag = document.createElement('div');
             tag.className = 'hour-tag';
             tag.innerHTML = hora + ' <span onclick="removeHour(' + index + ')">×</span>';
             container.appendChild(tag);
@@ -404,23 +411,23 @@
     }
 
     function saveConfiguration() {
-        var name = document.getElementById('username-input').value;
+        const name = document.getElementById('username-input').value;
         if(name) {
             localStorage.setItem('app_user_name', name);
             document.getElementById('user-greeting').innerText = "¡Hola, " + name + "!";
         }
-        localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
         
-        // Guardar estado del sonido
-        var soundEnabled = document.getElementById('sound-toggle').checked;
-        localStorage.setItem('app_user_sound', soundEnabled ? 'true' : 'false');
-
+        // Guardar horas y sonido
+        localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
+        const soundEnabled = document.getElementById('sound-checkbox').checked;
+        localStorage.setItem('app_sound_enabled', soundEnabled);
+        
         document.getElementById('config-box').style.display = 'none';
         alert("¡Configuración guardada correctamente!");
     }
 
     function toggleContent(id) {
-        var element = document.getElementById('content-' + id);
+        const element = document.getElementById('content-' + id);
         if(element.style.display === 'block') {
             element.style.display = 'none';
         } else {
@@ -429,27 +436,48 @@
         }
     }
 
-    function probarCampana() {
-        var sonido = document.getElementById('audio-campana');
-        if (sonido) {
-            sonido.currentTime = 0;
-            sonido.play().catch(function(e) {
-                alert("Por favor, haz un clic previo en la pantalla para permitir el audio.");
-            });
+    // Generador matemático puro de Campana de Bronce de Iglesia Católica
+    function playSynthesizedChime() {
+        try {
+            if (!audioCtx) {
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            var ahora = audioCtx.currentTime;
+            var frecuencias = [110.00, 220.00, 261.63, 329.63, 440.00];
+            var ganancias = [0.35, 0.30, 0.22, 0.15, 0.10];
+            var duraciones = [4.5, 3.5, 3.0, 2.2, 1.2];
+
+            for (var i = 0; i < frecuencias.length; i++) {
+                var osc = audioCtx.createOscillator();
+                var gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(frecuencias[i], ahora);
+                
+                gainNode.gain.setValueAtTime(ganancias[i], ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[i]);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(ahora);
+                osc.stop(ahora + duraciones[i]);
+            }
+        } catch (e) {
+            console.log("Error tocando la campana:", e);
         }
     }
 
     function showNotification() {
-        // Verificar la programación del interruptor de sonido
-        var savedSound = localStorage.getItem('app_user_sound');
-        if (savedSound === 'true' || savedSound === null) {
-            var sonido = document.getElementById('audio-campana');
-            if (sonido) {
-                sonido.currentTime = 0;
-                sonido.play().catch(function(e) {
-                    console.log("Audio retenido por el navegador en segundo plano:", e);
-                });
-            }
+        // Verificar si el usuario activó o desactivó el sonido (true por defecto)
+        var isSoundEnabled = localStorage.getItem('app_sound_enabled') !== 'false';
+        
+        if (isSoundEnabled) {
+            playSynthesizedChime();
         }
 
         if (Notification.permission === "granted") {
