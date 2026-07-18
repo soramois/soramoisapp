@@ -223,12 +223,12 @@
         </div>
     </div>
 
-    <!-- Llamada Dinámica Superior -->
+    <!-- Llamada Dinámica Superior[cite: 1] -->
     <div class="widget-compacto" id="text-llamada">
         "Cargando presencia divina..."
     </div>
 
-    <!-- Zona Central Inspiración (Amanecer / Cita Bíblica) -->
+    <!-- Zona Central Inspiración -->
     <div class="inspiration-card">
         <img id="main-inspiration-photo" src="https://images.unsplash.com/photo-1470252649358-96f3c8024252?q=80&w=600&auto=format&fit=cover" class="inspiration-img" alt="Espacio de Luz">
         <div class="prayer-day">
@@ -237,7 +237,7 @@
         </div>
     </div>
 
-    <!-- Botones de Acción Estructurados según Word -->
+    <!-- Botones de Acción Estructurados[cite: 1] -->
     <div class="buttons-grid">
         <button class="action-btn" onclick="toggleContent('luz')">Luz para hoy <span>▼</span></button>
         <div id="content-luz" class="content-display"></div>
@@ -271,7 +271,7 @@
             renderHoursTags();
         }
 
-        // 3. Cargar el archivo JSON de forma segura (40 días sin repetición)
+        // 3. Cargar el archivo JSON (40 días)[cite: 1]
         fetch('./oraciones.json')
             .then(res => res.json())
             .then(oraciones => {
@@ -289,7 +289,7 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar los datos dinámicos del Word en la Pantalla
+                // Pintar datos[cite: 1]
                 document.getElementById('text-llamada').innerHTML = `"${datosHoy.llamada}"`;
                 
                 const fotoCentral = document.getElementById('main-inspiration-photo');
@@ -313,7 +313,7 @@
             Notification.requestPermission();
         }
 
-        // 5. Reloj de alarmas
+        // 5. Reloj de alarmas (revisa cada 30 segundos)
         setInterval(() => {
             if (listaHoras.length > 0) {
                 const ahora = new Date();
@@ -377,7 +377,56 @@
         }
     }
 
+    // FUNCIÓN EXCLUSIVA: Genera un toque de campana de iglesia católica (bronce tradicional)
+    function playSynthesizedChime() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            
+            const audioCtx = new AudioContext();
+            const ahora = audioCtx.currentTime;
+            
+            // Frecuencias armónicas exactas de una campana de iglesia real basada en nota fundamental La3 (220Hz)
+            const frecuencias = [
+                110.00, // Hum tone (Grave profundo, sostiene el eco de la campana)
+                220.00, // Fundamental / Strike tone (El tono de golpe)
+                261.63, // Tercera menor (¡El intervalo que le da el toque litúrgico y solemne!)
+                329.63, // Quinta justa
+                440.00  // Nominal (Octava superior aguda del impacto)
+            ];
+            
+            // Fuerza de cada tono en el golpe inicial
+            const ganancias = [0.35, 0.30, 0.22, 0.15, 0.10];
+            // Duración del eco en segundos (las notas graves resuenan más tiempo)
+            const duraciones = [4.5, 3.5, 3.0, 2.2, 1.2];
+
+            frecuencias.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ahora);
+                
+                // Simula el martillazo de bronce: volumen máximo al inicio y caída lenta exponencial
+                gainNode.gain.setValueAtTime(ganancias[index], ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[index]);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(ahora);
+                osc.stop(ahora + duraciones[index]);
+            });
+        } catch (e) {
+            console.log("Audio retenido por restricciones del navegador web.", e);
+        }
+    }
+
     function showNotification() {
+        // Ejecutar el toque de campana de iglesia
+        playSynthesizedChime();
+
+        // Mostrar notificación de escritorio/móvil
         if (Notification.permission === "granted") {
             new Notification("Momento de Conexión - God Willing", {
                 body: "Recuerda: eres un hijo amadísimo de Dios. Permanece unido a Él en tu rutina.",
