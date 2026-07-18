@@ -207,9 +207,9 @@
             <input type="time" id="reminder-time-input">
             <button type="button" onclick="addHourToList()">+</button>
         </div>
-        <div class="hours-tag-container" id="hours-tags"></div>
+        <div class="hours-tags-container" id="hours-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;"></div>
         
-        <!-- Nueva opción programable para el sonido -->
+        <!-- Opción programable para el sonido -->
         <label style="display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 5px; cursor: pointer;">
             <input type="checkbox" id="sound-toggle" checked style="width: auto; margin: 0;">
             <strong>🔔 Activar sonido de campana</strong>
@@ -295,13 +295,13 @@
             renderHoursTags();
         }
 
-        // 2b. Cargar preferencia programable del Sonido
+        // 2b. Cargar preferencia del Sonido
         var savedSound = localStorage.getItem('app_user_sound');
         if (savedSound !== null) {
             document.getElementById('sound-toggle').checked = (savedSound === 'true');
         }
 
-        // 3. Cargar el archivo JSON (40 días)
+        // 3. Cargar el archivo JSON (40 días)[cite: 1]
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
@@ -323,7 +323,7 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar datos
+                // Pintar datos[cite: 1]
                 document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
                 
                 var fotoCentral = document.getElementById('main-inspiration-photo');
@@ -366,8 +366,8 @@
     }
 
     function addHourToList() {
-        const timeInput = document.getElementById('reminder-time-input');
-        const nuevaHora = timeInput.value;
+        var timeInput = document.getElementById('reminder-time-input');
+        var nuevaHora = timeInput.value;
         if(nuevaHora && listaHoras.indexOf(nuevaHora) === -1) {
             listaHoras.push(nuevaHora);
             listaHoras.sort();
@@ -382,10 +382,10 @@
     }
 
     function renderHoursTags() {
-        const container = document.getElementById('hours-tags');
+        var container = document.getElementById('hours-tags');
         container.innerHTML = "";
         listaHoras.forEach(function(hora, index) {
-            const tag = document.createElement('div');
+            var tag = document.createElement('div');
             tag.className = 'hour-tag';
             tag.innerHTML = hora + ' <span onclick="removeHour(' + index + ')">×</span>';
             container.appendChild(tag);
@@ -393,7 +393,7 @@
     }
 
     function saveConfiguration() {
-        const name = document.getElementById('username-input').value;
+        var name = document.getElementById('username-input').value;
         if(name) {
             localStorage.setItem('app_user_name', name);
             document.getElementById('user-greeting').innerText = "¡Hola, " + name + "!";
@@ -409,7 +409,7 @@
     }
 
     function toggleContent(id) {
-        const element = document.getElementById('content-' + id);
+        var element = document.getElementById('content-' + id);
         if(element.style.display === 'block') {
             element.style.display = 'none';
         } else {
@@ -440,7 +440,6 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(frecuencias[i], ahora);
                 
-                gainNode.gain.setValueAtTime(ganancias[i], estaba o no );
                 gainNode.gain.setValueAtTime(ganancias[i], ahora);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[i]);
                 
@@ -456,7 +455,6 @@
     }
 
     function showNotification() {
-        // Verificar si el usuario tiene el sonido programado como ACTIVO
         var savedSound = localStorage.getItem('app_user_sound');
         if (savedSound === 'true' || savedSound === null) {
             playSynthesizedChime();
