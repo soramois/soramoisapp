@@ -223,7 +223,7 @@
         </div>
     </div>
 
-    <!-- Llamada Dinámica Superior[cite: 1] -->
+    <!-- Llamada Dinámica Superior -->
     <div class="widget-compacto" id="text-llamada">
         "Cargando presencia divina..."
     </div>
@@ -237,7 +237,7 @@
         </div>
     </div>
 
-    <!-- Botones de Acción Estructurados[cite: 1] -->
+    <!-- Botones de Acción Estructurados -->
     <div class="buttons-grid">
         <button class="action-btn" onclick="toggleContent('luz')">Luz para hoy <span>▼</span></button>
         <div id="content-luz" class="content-display"></div>
@@ -254,45 +254,69 @@
 </div>
 
 <script>
-    let listaHoras = [];
+    var listaHoras = [];
+    var audioCtx = null;
+
+    // Función segura para despertar el sistema de sonido mediante toque manual
+    function desbloquearAudioSistema() {
+        try {
+            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass && !audioCtx) {
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch (e) {
+            console.log("No se pudo iniciar el motor de audio:", e);
+        }
+    }
+
+    // Escuchar cualquier toque en la pantalla para otorgar permisos de sonido
+    window.onclick = function() { desbloquearAudioSistema(); };
+    window.ontouchstart = function() { desbloquearAudioSistema(); };
 
     window.onload = function() {
         // 1. Cargar Nombre
-        const savedName = localStorage.getItem('app_user_name');
+        var savedName = localStorage.getItem('app_user_name');
         if(savedName) {
             document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
             document.getElementById('config-box').style.display = 'none';
         }
         
         // 2. Cargar Horas
-        const savedHours = localStorage.getItem('app_user_hours');
+        var savedHours = localStorage.getItem('app_user_hours');
         if(savedHours) {
             listaHoras = JSON.parse(savedHours);
             renderHoursTags();
         }
 
-        // 3. Cargar el archivo JSON (40 días)[cite: 1]
+        // 3. Cargar el archivo JSON (40 días)
         fetch('./oraciones.json')
-            .then(res => res.json())
-            .then(oraciones => {
-                let historial = JSON.parse(localStorage.getItem('app_historial_oraciones') || '[]');
-                let disponibles = oraciones.filter(o => !historial.includes(o.id));
+            .then(function(res) { return res.json(); })
+            .then(function(oraciones) {
+                var historialRaw = localStorage.getItem('app_historial_oraciones');
+                var historial = historialRaw ? JSON.parse(historialRaw) : [];
+                
+                var disponibles = oraciones.filter(function(o) {
+                    return historial.indexOf(o.id) === -1;
+                });
                 
                 if (disponibles.length === 0) {
                     historial = [];
                     disponibles = oraciones;
                 }
                 
-                const indiceAleatorio = Math.floor(Math.random() * disponibles.length);
-                const datosHoy = disponibles[indiceAleatorio];
+                var indiceAleatorio = Math.floor(Math.random() * disponibles.length);
+                var datosHoy = disponibles[indiceAleatorio];
                 
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar datos[cite: 1]
-                document.getElementById('text-llamada').innerHTML = `"${datosHoy.llamada}"`;
+                // Pintar datos
+                document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
                 
-                const fotoCentral = document.getElementById('main-inspiration-photo');
+                var fotoCentral = document.getElementById('main-inspiration-photo');
                 fotoCentral.src = datosHoy.imagen;
                 fotoCentral.style.display = 'block';
 
@@ -302,9 +326,9 @@
                 document.getElementById('content-examen').innerHTML = "<strong>Examen:</strong><br>" + datosHoy.examen;
                 document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + datosHoy.intencion;
             })
-            .catch(err => {
+            .catch(function(err) {
                 console.error("Error cargando las oraciones: ", err);
-                document.getElementById('text-llamada').innerText = "\"Te tengo abrazado. Sigamos juntos.\"";
+                document.getElementById('text-llamada').innerText = '"Te tengo abrazado. Sigamos juntos."';
                 document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
@@ -314,12 +338,14 @@
         }
 
         // 5. Reloj de alarmas (revisa cada 30 segundos)
-        setInterval(() => {
+        setInterval(function() {
             if (listaHoras.length > 0) {
-                const ahora = new Date();
-                const horaActual = ahora.getHours().toString().padStart(2, '0') + ":" + ahora.getMinutes().toString().padStart(2, '0');
+                var ahora = new Date();
+                var hrs = ahora.getHours();
+                var mins = ahora.getMinutes();
+                var horaActual = (hrs < 10 ? '0' + hrs : hrs) + ":" + (mins < 10 ? '0' + mins : mins);
                 
-                if (listaHoras.includes(horaActual)) {
+                if (listaHoras.indexOf(horaActual) !== -1) {
                     if (window.lastNotifiedMinute !== horaActual) {
                         showNotification();
                         window.lastNotifiedMinute = horaActual; 
@@ -332,7 +358,7 @@
     function addHourToList() {
         const timeInput = document.getElementById('reminder-time-input');
         const nuevaHora = timeInput.value;
-        if(nuevaHora && !listaHoras.includes(nuevaHora)) {
+        if(nuevaHora && listaHoras.indexOf(nuevaHora) === -1) {
             listaHoras.push(nuevaHora);
             listaHoras.sort();
             renderHoursTags();
@@ -348,10 +374,10 @@
     function renderHoursTags() {
         const container = document.getElementById('hours-tags');
         container.innerHTML = "";
-        listaHoras.forEach((hora, index) => {
+        listaHoras.forEach(function(hora, index) {
             const tag = document.createElement('div');
             tag.className = 'hour-tag';
-            tag.innerHTML = hora + ` <span onclick="removeHour(${index})">×</span>`;
+            tag.innerHTML = hora + ' <span onclick="removeHour(' + index + ')">×</span>';
             container.appendChild(tag);
         });
     }
@@ -372,61 +398,50 @@
         if(element.style.display === 'block') {
             element.style.display = 'none';
         } else {
-            document.querySelectorAll('.content-display').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.content-display').forEach(function(el) { el.style.display = 'none'; });
             element.style.display = 'block';
         }
     }
 
-    // FUNCIÓN EXCLUSIVA: Genera un toque de campana de iglesia católica (bronce tradicional)
+    // Generador matemático puro de Campana de Bronce de Iglesia Católica
     function playSynthesizedChime() {
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
+            if (!audioCtx) {
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            const audioCtx = new AudioContext();
-            const ahora = audioCtx.currentTime;
-            
-            // Frecuencias armónicas exactas de una campana de iglesia real basada en nota fundamental La3 (220Hz)
-            const frecuencias = [
-                110.00, // Hum tone (Grave profundo, sostiene el eco de la campana)
-                220.00, // Fundamental / Strike tone (El tono de golpe)
-                261.63, // Tercera menor (¡El intervalo que le da el toque litúrgico y solemne!)
-                329.63, // Quinta justa
-                440.00  // Nominal (Octava superior aguda del impacto)
-            ];
-            
-            // Fuerza de cada tono en el golpe inicial
-            const ganancias = [0.35, 0.30, 0.22, 0.15, 0.10];
-            // Duración del eco en segundos (las notas graves resuenan más tiempo)
-            const duraciones = [4.5, 3.5, 3.0, 2.2, 1.2];
+            var ahora = audioCtx.currentTime;
+            var frecuencias = [110.00, 220.00, 261.63, 329.63, 440.00];
+            var ganancias = [0.35, 0.30, 0.22, 0.15, 0.10];
+            var duraciones = [4.5, 3.5, 3.0, 2.2, 1.2];
 
-            frecuencias.forEach((freq, index) => {
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+            for (var i = 0; i < frecuencias.length; i++) {
+                var osc = audioCtx.createOscillator();
+                var gainNode = audioCtx.createGain();
                 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, ahora);
+                osc.frequency.setValueAtTime(frecuencias[i], ahora);
                 
-                // Simula el martillazo de bronce: volumen máximo al inicio y caída lenta exponencial
-                gainNode.gain.setValueAtTime(ganancias[index], ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[index]);
+                gainNode.gain.setValueAtTime(ganancias[i], ahora);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[i]);
                 
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 
                 osc.start(ahora);
-                osc.stop(ahora + duraciones[index]);
-            });
+                osc.stop(ahora + duraciones[i]);
+            }
         } catch (e) {
-            console.log("Audio retenido por restricciones del navegador web.", e);
+            console.log("Error tocando la campana:", e);
         }
     }
 
     function showNotification() {
-        // Ejecutar el toque de campana de iglesia
         playSynthesizedChime();
 
-        // Mostrar notificación de escritorio/móvil
         if (Notification.permission === "granted") {
             new Notification("Momento de Conexión - God Willing", {
                 body: "Recuerda: eres un hijo amadísimo de Dios. Permanece unido a Él en tu rutina.",
