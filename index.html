@@ -153,12 +153,6 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .hours-tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 10px 0;
-        }
         .hour-tag {
             background: var(--turquesa);
             color: white;
@@ -192,6 +186,18 @@
             cursor: pointer;
             color: var(--turquesa);
         }
+        .btn-test-sound {
+            background: #e0f2f1;
+            color: var(--turquesa);
+            border: 1px dashed var(--turquesa);
+            padding: 8px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -207,13 +213,16 @@
             <input type="time" id="reminder-time-input">
             <button type="button" onclick="addHourToList()">+</button>
         </div>
-        <div class="hours-tags-container" id="hours-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;"></div>
+        <div id="hours-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;"></div>
         
         <!-- Opción programable para el sonido -->
         <label style="display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 5px; cursor: pointer;">
             <input type="checkbox" id="sound-toggle" checked style="width: auto; margin: 0;">
             <strong>🔔 Activar sonido de campana</strong>
         </label>
+
+        <!-- NUEVO: Botón para probar la campana en el acto -->
+        <button type="button" class="btn-test-sound" onclick="playSynthesizedChime()">🔊 Probar toque de campana ahora</button>
         
         <button class="btn-main-save" onclick="saveConfiguration()">Guardar y Comenzar</button>
     </div>
@@ -400,7 +409,6 @@
         }
         localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
         
-        // Guardar estado del sonido
         var soundEnabled = document.getElementById('sound-toggle').checked;
         localStorage.setItem('app_user_sound', soundEnabled ? 'true' : 'false');
 
@@ -418,12 +426,12 @@
         }
     }
 
-    // Generador de Campana de Iglesia Católica - 100% Corregido sin textos intrusivos
+    // Generador de Campana de Iglesia Católica - Optimizado a prueba de fallos
     function playSynthesizedChime() {
         try {
-            if (!audioCtx) {
-                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
+            var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass && !audioCtx) {
+                audioCtx = new AudioContextClass();
             }
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -441,7 +449,7 @@
                 osc.frequency.setValueAtTime(frecuencias[i], ahora);
                 
                 gainNode.gain.setValueAtTime(ganancias[i], ahora);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[i]);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ahora + duraciones[i]);
                 
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
