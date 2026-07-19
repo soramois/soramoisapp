@@ -314,45 +314,35 @@
         }
     }
 
+    // Cualquier interacción en la pantalla mantiene vivo el permiso de sonido
     window.onclick = function() { desbloquearAudioSistema(); };
     window.ontouchstart = function() { desbloquearAudioSistema(); };
 
     window.onload = function() {
-        // Cargar Nombre
         var savedName = localStorage.getItem('app_user_name');
         if(savedName) {
             document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
             document.getElementById('config-box').style.display = 'none';
         }
         
-        // Cargar Horas
         var savedHours = localStorage.getItem('app_user_hours');
         if(savedHours) {
             listaHoras = JSON.parse(savedHours);
             renderHoursTags();
         }
 
-        // Cargar Preferencia de Sonido
         var savedSound = localStorage.getItem('app_sound_enabled');
         if(savedSound !== null) {
             document.getElementById('sound-checkbox').checked = (savedSound === 'true');
         }
 
-        // Cargar JSON
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
                 var historialRaw = localStorage.getItem('app_historial_oraciones');
                 var historial = historialRaw ? JSON.parse(historialRaw) : [];
-                
-                var disponibles = oraciones.filter(function(o) {
-                    return historial.indexOf(o.id) === -1;
-                });
-                
-                if (disponibles.length === 0) {
-                    historial = [];
-                    disponibles = oraciones;
-                }
+                var disponibles = oraciones.filter(function(o) { return historial.indexOf(o.id) === -1; });
+                if (disponibles.length === 0) { historial = []; disponibles = oraciones; }
                 
                 var indiceAleatorio = Math.floor(Math.random() * disponibles.length);
                 var datosHoy = disponibles[indiceAleatorio];
@@ -361,11 +351,9 @@
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
                 document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
-                
                 var fotoCentral = document.getElementById('main-inspiration-photo');
                 fotoCentral.src = datosHoy.imagen;
                 fotoCentral.style.display = 'block';
-
                 document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra;
                 document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + datosHoy.luz;
                 document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + datosHoy.oracion;
@@ -378,7 +366,7 @@
                 document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
-        // Reloj de alarmas
+        // Reloj acelerado: revisa cada 10 segundos en lugar de 30 para burlar el "ahorro de energía" del navegador
         setInterval(function() {
             if (listaHoras.length > 0) {
                 var ahora = new Date();
@@ -393,7 +381,7 @@
                     }
                 }
             }
-        }, 30000);
+        }, 10000);
     }
 
     function addHourToList() {
@@ -424,7 +412,6 @@
     }
 
     function saveConfiguration() {
-        // Pedir permisos de notificación de forma segura aquí al hacer clic
         if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
             Notification.requestPermission();
         }
@@ -436,11 +423,13 @@
         }
         
         localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
-        
         const soundEnabled = document.getElementById('sound-checkbox').checked;
         localStorage.setItem('app_sound_enabled', soundEnabled);
         
         document.getElementById('config-box').style.display = 'none';
+        
+        // Al guardar, obligamos al sistema a crear un contexto de audio en limpio
+        desbloquearAudioSistema();
         alert("¡Configuración guardada! La página ya está lista para notificarte.");
     }
 
@@ -500,19 +489,30 @@
     }
 
     function showNotification() {
-        // Lee directamente el valor de la memoria
         var isSoundEnabled = localStorage.getItem('app_sound_enabled') !== 'false';
         
+        // 1. Intentar hacer sonar la campana inmediatamente
         if (isSoundEnabled) {
             desbloquearAudioSistema();
             playSynthesizedChime();
         }
 
+        // 2. Enviar la notificación visual
         if (window.Notification && Notification.permission === "granted") {
-            new Notification("Momento de Conexión - God Willing", {
-                body: "Recuerda: eres un hijo amadísimo de Dios. Permanece unido a Él en tu rutina.",
-                icon: "logo.png"
+            var notif = new Notification("Momento de Conexión - God Willing", {
+                body: "Recuerda: eres un hijo amadísimo de Dios. Toca aquí para ver tu mensaje.",
+                icon: "logo.png",
+                requireInteraction: true // Fuerza a que la notificación no desaparezca sola
             });
+
+            // 3. Rescate: Si el navegador bloqueó el sonido, al hacer clic en la notificación sonará
+            notif.onclick = function() {
+                window.focus(); // Trae la página al frente
+                if (isSoundEnabled) {
+                    desbloquearAudioSistema();
+                    playSynthesizedChime();
+                }
+            };
         }
     }
 </script>
