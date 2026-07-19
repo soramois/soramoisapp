@@ -192,6 +192,40 @@
             cursor: pointer;
             color: var(--turquesa);
         }
+        .sound-toggle-container {
+            margin: 15px 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            justify-content: space-between;
+        }
+        .sound-toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sound-toggle-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--turquesa);
+        }
+        .btn-test-sound {
+            background: var(--blanco);
+            border: 1px solid var(--turquesa);
+            color: var(--turquesa);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-test-sound:hover {
+            background: #e0f7fa;
+        }
     </style>
 </head>
 <body>
@@ -208,6 +242,15 @@
             <button type="button" onclick="addHourToList()">+</button>
         </div>
         <div class="hours-tag-container" id="hours-tags"></div>
+        
+        <!-- Opciones de Sonido -->
+        <div class="sound-toggle-container">
+            <label class="sound-toggle-group">
+                <input type="checkbox" id="sound-checkbox" checked>
+                🔔 Activar campana
+            </label>
+            <button type="button" class="btn-test-sound" onclick="testSound()">Probar Sonido</button>
+        </div>
         
         <button class="btn-main-save" onclick="saveConfiguration()">Guardar y Comenzar</button>
     </div>
@@ -257,7 +300,6 @@
     var listaHoras = [];
     var audioCtx = null;
 
-    // Función segura para despertar el sistema de sonido mediante toque manual
     function desbloquearAudioSistema() {
         try {
             var AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -272,40 +314,35 @@
         }
     }
 
-    // Escuchar cualquier toque en la pantalla para otorgar permisos de sonido
+    // Cualquier interacción en la pantalla mantiene vivo el permiso de sonido
     window.onclick = function() { desbloquearAudioSistema(); };
     window.ontouchstart = function() { desbloquearAudioSistema(); };
 
     window.onload = function() {
-        // 1. Cargar Nombre
         var savedName = localStorage.getItem('app_user_name');
         if(savedName) {
             document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
             document.getElementById('config-box').style.display = 'none';
         }
         
-        // 2. Cargar Horas
         var savedHours = localStorage.getItem('app_user_hours');
         if(savedHours) {
             listaHoras = JSON.parse(savedHours);
             renderHoursTags();
         }
 
-        // 3. Cargar el archivo JSON (40 días)
+        var savedSound = localStorage.getItem('app_sound_enabled');
+        if(savedSound !== null) {
+            document.getElementById('sound-checkbox').checked = (savedSound === 'true');
+        }
+
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
                 var historialRaw = localStorage.getItem('app_historial_oraciones');
                 var historial = historialRaw ? JSON.parse(historialRaw) : [];
-                
-                var disponibles = oraciones.filter(function(o) {
-                    return historial.indexOf(o.id) === -1;
-                });
-                
-                if (disponibles.length === 0) {
-                    historial = [];
-                    disponibles = oraciones;
-                }
+                var disponibles = oraciones.filter(function(o) { return historial.indexOf(o.id) === -1; });
+                if (disponibles.length === 0) { historial = []; disponibles = oraciones; }
                 
                 var indiceAleatorio = Math.floor(Math.random() * disponibles.length);
                 var datosHoy = disponibles[indiceAleatorio];
@@ -313,13 +350,10 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar datos
                 document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
-                
                 var fotoCentral = document.getElementById('main-inspiration-photo');
                 fotoCentral.src = datosHoy.imagen;
                 fotoCentral.style.display = 'block';
-
                 document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra;
                 document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + datosHoy.luz;
                 document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + datosHoy.oracion;
@@ -327,17 +361,12 @@
                 document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + datosHoy.intencion;
             })
             .catch(function(err) {
-                console.error("Error cargando las oraciones: ", err);
+                console.error("Error cargando oraciones: ", err);
                 document.getElementById('text-llamada').innerText = '"Te tengo abrazado. Sigamos juntos."';
                 document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
-        // 4. Pedir permisos de notificación
-        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
-
-        // 5. Reloj de alarmas (revisa cada 30 segundos)
+        // Reloj acelerado: revisa cada 10 segundos en lugar de 30 para burlar el "ahorro de energía" del navegador
         setInterval(function() {
             if (listaHoras.length > 0) {
                 var ahora = new Date();
@@ -352,7 +381,7 @@
                     }
                 }
             }
-        }, 30000);
+        }, 10000);
     }
 
     function addHourToList() {
@@ -383,14 +412,25 @@
     }
 
     function saveConfiguration() {
+        if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
         const name = document.getElementById('username-input').value;
         if(name) {
             localStorage.setItem('app_user_name', name);
             document.getElementById('user-greeting').innerText = "¡Hola, " + name + "!";
         }
+        
         localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
+        const soundEnabled = document.getElementById('sound-checkbox').checked;
+        localStorage.setItem('app_sound_enabled', soundEnabled);
+        
         document.getElementById('config-box').style.display = 'none';
-        alert("¡Configuración guardada correctamente!");
+        
+        // Al guardar, obligamos al sistema a crear un contexto de audio en limpio
+        desbloquearAudioSistema();
+        alert("¡Configuración guardada! La página ya está lista para notificarte.");
     }
 
     function toggleContent(id) {
@@ -403,7 +443,6 @@
         }
     }
 
-    // Generador matemático puro de Campana de Bronce de Iglesia Católica
     function playSynthesizedChime() {
         try {
             if (!audioCtx) {
@@ -439,14 +478,41 @@
         }
     }
 
-    function showNotification() {
-        playSynthesizedChime();
+    function testSound() {
+        desbloquearAudioSistema();
+        var isChecked = document.getElementById('sound-checkbox').checked;
+        if (isChecked) {
+            playSynthesizedChime();
+        } else {
+            alert("No hay sonido porque la casilla está desmarcada. ¡Márcala para probar!");
+        }
+    }
 
-        if (Notification.permission === "granted") {
-            new Notification("Momento de Conexión - God Willing", {
-                body: "Recuerda: eres un hijo amadísimo de Dios. Permanece unido a Él en tu rutina.",
-                icon: "logo.png"
+    function showNotification() {
+        var isSoundEnabled = localStorage.getItem('app_sound_enabled') !== 'false';
+        
+        // 1. Intentar hacer sonar la campana inmediatamente
+        if (isSoundEnabled) {
+            desbloquearAudioSistema();
+            playSynthesizedChime();
+        }
+
+        // 2. Enviar la notificación visual
+        if (window.Notification && Notification.permission === "granted") {
+            var notif = new Notification("Momento de Conexión - God Willing", {
+                body: "Recuerda: eres un hijo amadísimo de Dios. Toca aquí para ver tu mensaje.",
+                icon: "logo.png",
+                requireInteraction: true // Fuerza a que la notificación no desaparezca sola
             });
+
+            // 3. Rescate: Si el navegador bloqueó el sonido, al hacer clic en la notificación sonará
+            notif.onclick = function() {
+                window.focus(); // Trae la página al frente
+                if (isSoundEnabled) {
+                    desbloquearAudioSistema();
+                    playSynthesizedChime();
+                }
+            };
         }
     }
 </script>
