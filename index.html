@@ -124,7 +124,7 @@
             margin-bottom: 20px;
             font-size: 14px;
             border: 1px solid #ffe082;
-            display: none; /* Oculto por defecto */
+            display: none;
         }
         .config-section input[type="text"] {
             padding: 8px;
@@ -193,15 +193,21 @@
             cursor: pointer;
             color: var(--turquesa);
         }
-        .sound-toggle-container {
+        .volume-container {
             margin: 15px 0 5px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-weight: bold;
             color: #555;
+            background: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .volume-container input[type="range"] {
+            flex: 1;
+            accent-color: var(--turquesa);
             cursor: pointer;
-            justify-content: space-between;
         }
         .setting-row {
             display: flex;
@@ -223,10 +229,12 @@
             border: 1px solid var(--turquesa);
             color: var(--turquesa);
             border-radius: 6px;
-            padding: 4px 8px;
+            padding: 6px 12px;
             font-size: 12px;
             cursor: pointer;
             font-weight: bold;
+            width: 100%;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -245,14 +253,13 @@
         </div>
         <div class="hours-tag-container" id="hours-tags"></div>
         
-        <!-- Opciones de Sonido y Pantalla -->
-        <div class="sound-toggle-container">
-            <label style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="sound-checkbox" checked>
-                🔔 Activar campana
-            </label>
-            <button type="button" class="btn-test-sound" id="btn-test-sound">Probar Sonido</button>
+        <!-- Control de Volumen (Reemplaza al interruptor) -->
+        <div class="volume-container">
+            <span>🔉</span>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5">
+            <span>🔊</span>
         </div>
+        <button type="button" class="btn-test-sound" id="btn-test-sound">Probar Volumen de Campana</button>
 
         <label class="setting-row">
             <input type="checkbox" id="wakelock-checkbox" checked>
@@ -269,7 +276,6 @@
             <div class="greeting" id="user-greeting">¡Hola!</div>
         </div>
         <div class="logo-container">
-            <!-- La imagen también oculta su icono roto de error automáticamente -->
             <img src="logo.png" onerror="this.style.display='none';" alt="Logo">
         </div>
     </div>
@@ -281,7 +287,6 @@
 
     <!-- Zona Central Inspiración -->
     <div class="inspiration-card">
-        <!-- Oculta la imagen principal suavemente si falla la carga en lugar de dejar un espacio en blanco -->
         <img id="main-inspiration-photo" src="" class="inspiration-img" alt="Espacio de Luz" style="display:none;" onerror="this.style.display='none';">
         <div class="prayer-day">
             <strong>Palabra de Vida Eterna:</strong><br><br>
@@ -289,7 +294,7 @@
         </div>
     </div>
 
-    <!-- Botones de Acción Estructurados (Sin 'onclick' en línea) -->
+    <!-- Botones de Acción Estructurados -->
     <div class="buttons-grid">
         <button class="action-btn" id="btn-luz">Luz para hoy <span>▼</span></button>
         <div id="content-luz" class="content-display"></div>
@@ -335,10 +340,14 @@
         } catch (e) {}
     }
 
+    // Generador de Campana (Ahora respeta el deslizador de volumen)
     function playSynthesizedChime() {
         try {
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Leer el volumen actual de la barra (de 0.0 a 1.0)
+            var globalVolume = parseFloat(document.getElementById('volume-slider').value);
             
             var ahora = audioCtx.currentTime;
             var frecuencias = [110.00, 220.00, 261.63, 329.63, 440.00];
@@ -352,7 +361,10 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(frecuencias[i], ahora);
                 
-                gainNode.gain.setValueAtTime(ganancias[i], ahora);
+                // Aplicar el multiplicador de volumen elegido por el usuario
+                var gananciaFinal = ganancias[i] * globalVolume;
+                
+                gainNode.gain.setValueAtTime(gananciaFinal, ahora);
                 gainNode.gain.exponentialRampToValueAtTime(0.001, ahora + duraciones[i]);
                 
                 osc.connect(gainNode);
@@ -364,21 +376,11 @@
         } catch (e) {}
     }
 
-    function testSound() {
-        desbloquearAudioSistema();
-        if (document.getElementById('sound-checkbox').checked) {
-            playSynthesizedChime();
-        } else {
-            alert("Sonido desactivado. Marca la casilla para probar.");
-        }
-    }
-
     function toggleContent(id) {
         var element = document.getElementById('content-' + id);
         if(element.style.display === 'block') {
             element.style.display = 'none';
         } else {
-            // Ocultar todos primero
             ['luz', 'oracion', 'examen', 'intencion'].forEach(function(sec) {
                 var el = document.getElementById('content-' + sec);
                 if(el) el.style.display = 'none';
@@ -413,7 +415,6 @@
             var spanX = document.createElement('span');
             spanX.innerText = "×";
             spanX.style.marginLeft = "5px";
-            // Asignación segura del evento click en lugar de usar onclick en HTML
             spanX.addEventListener('click', function() {
                 removeHour(index);
             });
@@ -436,23 +437,24 @@
         }
         
         localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
-        localStorage.setItem('app_sound_enabled', document.getElementById('sound-checkbox').checked);
+        
+        // Guardar el nivel de volumen elegido
+        var volumeLevel = document.getElementById('volume-slider').value;
+        localStorage.setItem('app_volume_level', volumeLevel);
+        
         localStorage.setItem('app_wakelock_enabled', document.getElementById('wakelock-checkbox').checked);
         
         document.getElementById('config-box').style.display = 'none';
         
         desbloquearAudioSistema();
         requestWakeLock();
-        alert("¡Configuración guardada exitosamente!");
+        alert("¡Configuración guardada! La campana sonará a las horas indicadas.");
     }
 
     function showNotification() {
-        var isSoundEnabled = localStorage.getItem('app_sound_enabled') !== 'false';
-        
-        if (isSoundEnabled) {
-            desbloquearAudioSistema();
-            playSynthesizedChime();
-        }
+        // La campana ahora siempre suena (con el volumen elegido)
+        desbloquearAudioSistema();
+        playSynthesizedChime();
 
         if (window.Notification && Notification.permission === "granted") {
             var notif = new Notification("Momento de Conexión - God Willing", {
@@ -461,16 +463,13 @@
             });
             notif.onclick = function() {
                 window.focus();
-                if (isSoundEnabled) {
-                    desbloquearAudioSistema();
-                    playSynthesizedChime();
-                }
+                desbloquearAudioSistema();
+                playSynthesizedChime();
             };
         }
     }
 
     function iniciarApp() {
-        // Cargar Nombre y decidir si se muestra la configuración
         var savedName = localStorage.getItem('app_user_name');
         if(savedName) {
             document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
@@ -478,24 +477,23 @@
             document.getElementById('config-box').style.display = 'block';
         }
         
-        // Cargar Horas
         var savedHours = localStorage.getItem('app_user_hours');
         if(savedHours) {
             listaHoras = JSON.parse(savedHours);
             renderHoursTags();
         }
 
-        // Cargar Checkboxes
-        var savedSound = localStorage.getItem('app_sound_enabled');
-        if(savedSound !== null) {
-            document.getElementById('sound-checkbox').checked = (savedSound === 'true');
+        // Cargar el volumen si existe
+        var savedVolume = localStorage.getItem('app_volume_level');
+        if(savedVolume !== null) {
+            document.getElementById('volume-slider').value = savedVolume;
         }
+
         var savedWakeLock = localStorage.getItem('app_wakelock_enabled');
         if(savedWakeLock !== null) {
             document.getElementById('wakelock-checkbox').checked = (savedWakeLock === 'true');
         }
 
-        // Cargar JSON de oraciones
         fetch('./oraciones.json')
             .then(function(res) { return res.json(); })
             .then(function(oraciones) {
@@ -510,15 +508,12 @@
                 historial.push(datosHoy.id);
                 localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
                 
-                // Pintar datos seguros en pantalla
                 document.getElementById('text-llamada').innerText = '"' + (datosHoy.llamada || '') + '"';
-                
                 var fotoCentral = document.getElementById('main-inspiration-photo');
                 if (datosHoy.imagen && datosHoy.imagen.trim() !== "") {
                     fotoCentral.src = datosHoy.imagen;
                     fotoCentral.style.display = 'block';
                 }
-                
                 document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra || '';
                 document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + (datosHoy.luz || '');
                 document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + (datosHoy.oracion || '');
@@ -526,12 +521,11 @@
                 document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + (datosHoy.intencion || '');
             })
             .catch(function(err) {
-                console.error("No se pudo cargar oraciones.json", err);
                 document.getElementById('text-llamada').innerText = '"Te tengo abrazado. Sigamos juntos."';
                 document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
             });
 
-        // Reloj acelerado (10s)
+        // Reloj verificador
         setInterval(function() {
             if (listaHoras.length > 0) {
                 var ahora = new Date();
@@ -549,36 +543,38 @@
         }, 10000);
     }
 
-    // --- ASIGNACIÓN DE EVENTOS SEGUROS ---
-    
-    // DOMContentLoaded asegura que el código de JS no se ejecute hasta que toda la interfaz gráfica exista.
     document.addEventListener('DOMContentLoaded', function() {
-        
-        // Asignación de botones principales
         document.getElementById('btn-open-config').addEventListener('click', function() {
             var box = document.getElementById('config-box');
             box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
         });
         
         document.getElementById('btn-add-hour').addEventListener('click', addHourToList);
-        document.getElementById('btn-test-sound').addEventListener('click', testSound);
-        document.getElementById('btn-save-config').addEventListener('click', saveConfiguration);
-
-        // Asignación de menús desplegables
-        ['luz', 'oracion', 'examen', 'intencion'].forEach(function(sec) {
-            document.getElementById('btn-' + sec).addEventListener('click', function() {
-                toggleContent(sec);
-            });
+        
+        // El botón probar sonido solo ejecuta la campana para ver el volumen actual
+        document.getElementById('btn-test-sound').addEventListener('click', function() {
+            desbloquearAudioSistema();
+            playSynthesizedChime();
+        });
+        
+        // Si el usuario mueve la barra, suena un poquito para que note el volumen
+        document.getElementById('volume-slider').addEventListener('change', function() {
+            desbloquearAudioSistema();
+            playSynthesizedChime();
         });
 
-        // Activar el motor de audio de fondo y mantener pantalla encendida si vuelves a la pestaña
+        document.getElementById('btn-save-config').addEventListener('click', saveConfiguration);
+
+        ['luz', 'oracion', 'examen', 'intencion'].forEach(function(sec) {
+            document.getElementById('btn-' + sec).addEventListener('click', function() { toggleContent(sec); });
+        });
+
         document.body.addEventListener('click', desbloquearAudioSistema);
         document.body.addEventListener('touchstart', desbloquearAudioSistema);
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === 'visible') requestWakeLock();
         });
 
-        // Iniciar todo
         iniciarApp();
     });
 
