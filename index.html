@@ -124,6 +124,7 @@
             margin-bottom: 20px;
             font-size: 14px;
             border: 1px solid #ffe082;
+            display: none; /* Oculto por defecto */
         }
         .config-section input[type="text"] {
             padding: 8px;
@@ -193,7 +194,7 @@
             color: var(--turquesa);
         }
         .sound-toggle-container {
-            margin: 15px 0 10px 0;
+            margin: 15px 0 5px 0;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -202,12 +203,16 @@
             cursor: pointer;
             justify-content: space-between;
         }
-        .sound-toggle-group {
+        .setting-row {
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
         }
-        .sound-toggle-group input[type="checkbox"] {
+        input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
@@ -223,9 +228,6 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-test-sound:hover {
-            background: #e0f7fa;
-        }
     </style>
 </head>
 <body>
@@ -239,30 +241,36 @@
         <label><strong>Programar horas de atención:</strong></label>
         <div class="time-picker-row">
             <input type="time" id="reminder-time-input">
-            <button type="button" onclick="addHourToList()">+</button>
+            <button type="button" id="btn-add-hour">+</button>
         </div>
         <div class="hours-tag-container" id="hours-tags"></div>
         
-        <!-- Opciones de Sonido -->
+        <!-- Opciones de Sonido y Pantalla -->
         <div class="sound-toggle-container">
-            <label class="sound-toggle-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="sound-checkbox" checked>
                 🔔 Activar campana
             </label>
-            <button type="button" class="btn-test-sound" onclick="testSound()">Probar Sonido</button>
+            <button type="button" class="btn-test-sound" id="btn-test-sound">Probar Sonido</button>
         </div>
+
+        <label class="setting-row">
+            <input type="checkbox" id="wakelock-checkbox" checked>
+            ☀️ Mantener pantalla encendida
+        </label>
         
-        <button class="btn-main-save" onclick="saveConfiguration()">Guardar y Comenzar</button>
+        <button class="btn-main-save" id="btn-save-config">Guardar y Comenzar</button>
     </div>
 
     <!-- Cabecera -->
     <div class="header">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <button class="gear-btn" onclick="document.getElementById('config-box').style.display = 'block'">⚙️</button>
+            <button class="gear-btn" id="btn-open-config">⚙️</button>
             <div class="greeting" id="user-greeting">¡Hola!</div>
         </div>
         <div class="logo-container">
-            <img src="logo.png" onerror="this.src='https://via.placeholder.com/65?text=SM'" alt="Logo">
+            <!-- La imagen también oculta su icono roto de error automáticamente -->
+            <img src="logo.png" onerror="this.style.display='none';" alt="Logo">
         </div>
     </div>
 
@@ -273,25 +281,26 @@
 
     <!-- Zona Central Inspiración -->
     <div class="inspiration-card">
-        <img id="main-inspiration-photo" src="https://images.unsplash.com/photo-1470252649358-96f3c8024252?q=80&w=600&auto=format&fit=cover" class="inspiration-img" alt="Espacio de Luz">
+        <!-- Oculta la imagen principal suavemente si falla la carga en lugar de dejar un espacio en blanco -->
+        <img id="main-inspiration-photo" src="" class="inspiration-img" alt="Espacio de Luz" style="display:none;" onerror="this.style.display='none';">
         <div class="prayer-day">
             <strong>Palabra de Vida Eterna:</strong><br><br>
             <span id="text-oracion-central">Cargando Palabra...</span>
         </div>
     </div>
 
-    <!-- Botones de Acción Estructurados -->
+    <!-- Botones de Acción Estructurados (Sin 'onclick' en línea) -->
     <div class="buttons-grid">
-        <button class="action-btn" onclick="toggleContent('luz')">Luz para hoy <span>▼</span></button>
+        <button class="action-btn" id="btn-luz">Luz para hoy <span>▼</span></button>
         <div id="content-luz" class="content-display"></div>
 
-        <button class="action-btn" onclick="toggleContent('oracion')">Oración <span>▼</span></button>
+        <button class="action-btn" id="btn-oracion">Oración <span>▼</span></button>
         <div id="content-oracion" class="content-display"></div>
 
-        <button class="action-btn" onclick="toggleContent('examen')">Examen <span>▼</span></button>
+        <button class="action-btn" id="btn-examen">Examen <span>▼</span></button>
         <div id="content-examen" class="content-display"></div>
 
-        <button class="action-btn" onclick="toggleContent('intencion')">Intención <span>▼</span></button>
+        <button class="action-btn" id="btn-intencion">Intención <span>▼</span></button>
         <div id="content-intencion" class="content-display"></div>
     </div>
 </div>
@@ -299,6 +308,20 @@
 <script>
     var listaHoras = [];
     var audioCtx = null;
+    var wakeLock = null;
+
+    // --- FUNCIONES DEL SISTEMA ---
+    
+    async function requestWakeLock() {
+        var isWakeLockEnabled = document.getElementById('wakelock-checkbox').checked;
+        if (isWakeLockEnabled && 'wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.log("No se pudo mantener la pantalla encendida.");
+            }
+        }
+    }
 
     function desbloquearAudioSistema() {
         try {
@@ -309,146 +332,11 @@
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-        } catch (e) {
-            console.log("No se pudo iniciar el motor de audio:", e);
-        }
-    }
-
-    // Cualquier interacción en la pantalla mantiene vivo el permiso de sonido
-    window.onclick = function() { desbloquearAudioSistema(); };
-    window.ontouchstart = function() { desbloquearAudioSistema(); };
-
-    window.onload = function() {
-        var savedName = localStorage.getItem('app_user_name');
-        if(savedName) {
-            document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
-            document.getElementById('config-box').style.display = 'none';
-        }
-        
-        var savedHours = localStorage.getItem('app_user_hours');
-        if(savedHours) {
-            listaHoras = JSON.parse(savedHours);
-            renderHoursTags();
-        }
-
-        var savedSound = localStorage.getItem('app_sound_enabled');
-        if(savedSound !== null) {
-            document.getElementById('sound-checkbox').checked = (savedSound === 'true');
-        }
-
-        fetch('./oraciones.json')
-            .then(function(res) { return res.json(); })
-            .then(function(oraciones) {
-                var historialRaw = localStorage.getItem('app_historial_oraciones');
-                var historial = historialRaw ? JSON.parse(historialRaw) : [];
-                var disponibles = oraciones.filter(function(o) { return historial.indexOf(o.id) === -1; });
-                if (disponibles.length === 0) { historial = []; disponibles = oraciones; }
-                
-                var indiceAleatorio = Math.floor(Math.random() * disponibles.length);
-                var datosHoy = disponibles[indiceAleatorio];
-                
-                historial.push(datosHoy.id);
-                localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
-                
-                document.getElementById('text-llamada').innerHTML = '"' + datosHoy.llamada + '"';
-                var fotoCentral = document.getElementById('main-inspiration-photo');
-                fotoCentral.src = datosHoy.imagen;
-                fotoCentral.style.display = 'block';
-                document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra;
-                document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + datosHoy.luz;
-                document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + datosHoy.oracion;
-                document.getElementById('content-examen').innerHTML = "<strong>Examen:</strong><br>" + datosHoy.examen;
-                document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + datosHoy.intencion;
-            })
-            .catch(function(err) {
-                console.error("Error cargando oraciones: ", err);
-                document.getElementById('text-llamada').innerText = '"Te tengo abrazado. Sigamos juntos."';
-                document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
-            });
-
-        // Reloj acelerado: revisa cada 10 segundos en lugar de 30 para burlar el "ahorro de energía" del navegador
-        setInterval(function() {
-            if (listaHoras.length > 0) {
-                var ahora = new Date();
-                var hrs = ahora.getHours();
-                var mins = ahora.getMinutes();
-                var horaActual = (hrs < 10 ? '0' + hrs : hrs) + ":" + (mins < 10 ? '0' + mins : mins);
-                
-                if (listaHoras.indexOf(horaActual) !== -1) {
-                    if (window.lastNotifiedMinute !== horaActual) {
-                        showNotification();
-                        window.lastNotifiedMinute = horaActual; 
-                    }
-                }
-            }
-        }, 10000);
-    }
-
-    function addHourToList() {
-        const timeInput = document.getElementById('reminder-time-input');
-        const nuevaHora = timeInput.value;
-        if(nuevaHora && listaHoras.indexOf(nuevaHora) === -1) {
-            listaHoras.push(nuevaHora);
-            listaHoras.sort();
-            renderHoursTags();
-            timeInput.value = "";
-        }
-    }
-
-    function removeHour(index) {
-        listaHoras.splice(index, 1);
-        renderHoursTags();
-    }
-
-    function renderHoursTags() {
-        const container = document.getElementById('hours-tags');
-        container.innerHTML = "";
-        listaHoras.forEach(function(hora, index) {
-            const tag = document.createElement('div');
-            tag.className = 'hour-tag';
-            tag.innerHTML = hora + ' <span onclick="removeHour(' + index + ')">×</span>';
-            container.appendChild(tag);
-        });
-    }
-
-    function saveConfiguration() {
-        if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
-
-        const name = document.getElementById('username-input').value;
-        if(name) {
-            localStorage.setItem('app_user_name', name);
-            document.getElementById('user-greeting').innerText = "¡Hola, " + name + "!";
-        }
-        
-        localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
-        const soundEnabled = document.getElementById('sound-checkbox').checked;
-        localStorage.setItem('app_sound_enabled', soundEnabled);
-        
-        document.getElementById('config-box').style.display = 'none';
-        
-        // Al guardar, obligamos al sistema a crear un contexto de audio en limpio
-        desbloquearAudioSistema();
-        alert("¡Configuración guardada! La página ya está lista para notificarte.");
-    }
-
-    function toggleContent(id) {
-        const element = document.getElementById('content-' + id);
-        if(element.style.display === 'block') {
-            element.style.display = 'none';
-        } else {
-            document.querySelectorAll('.content-display').forEach(function(el) { el.style.display = 'none'; });
-            element.style.display = 'block';
-        }
+        } catch (e) {}
     }
 
     function playSynthesizedChime() {
         try {
-            if (!audioCtx) {
-                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) audioCtx = new AudioContextClass();
-            }
             if (!audioCtx) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -473,41 +361,106 @@
                 osc.start(ahora);
                 osc.stop(ahora + duraciones[i]);
             }
-        } catch (e) {
-            console.log("Error tocando la campana:", e);
-        }
+        } catch (e) {}
     }
 
     function testSound() {
         desbloquearAudioSistema();
-        var isChecked = document.getElementById('sound-checkbox').checked;
-        if (isChecked) {
+        if (document.getElementById('sound-checkbox').checked) {
             playSynthesizedChime();
         } else {
-            alert("No hay sonido porque la casilla está desmarcada. ¡Márcala para probar!");
+            alert("Sonido desactivado. Marca la casilla para probar.");
         }
+    }
+
+    function toggleContent(id) {
+        var element = document.getElementById('content-' + id);
+        if(element.style.display === 'block') {
+            element.style.display = 'none';
+        } else {
+            // Ocultar todos primero
+            ['luz', 'oracion', 'examen', 'intencion'].forEach(function(sec) {
+                var el = document.getElementById('content-' + sec);
+                if(el) el.style.display = 'none';
+            });
+            element.style.display = 'block';
+        }
+    }
+
+    function addHourToList() {
+        var timeInput = document.getElementById('reminder-time-input');
+        var nuevaHora = timeInput.value;
+        if(nuevaHora && listaHoras.indexOf(nuevaHora) === -1) {
+            listaHoras.push(nuevaHora);
+            listaHoras.sort();
+            renderHoursTags();
+            timeInput.value = "";
+        }
+    }
+
+    function removeHour(index) {
+        listaHoras.splice(index, 1);
+        renderHoursTags();
+    }
+
+    function renderHoursTags() {
+        var container = document.getElementById('hours-tags');
+        container.innerHTML = "";
+        listaHoras.forEach(function(hora, index) {
+            var tag = document.createElement('div');
+            tag.className = 'hour-tag';
+            
+            var spanX = document.createElement('span');
+            spanX.innerText = "×";
+            spanX.style.marginLeft = "5px";
+            // Asignación segura del evento click en lugar de usar onclick en HTML
+            spanX.addEventListener('click', function() {
+                removeHour(index);
+            });
+
+            tag.innerText = hora;
+            tag.appendChild(spanX);
+            container.appendChild(tag);
+        });
+    }
+
+    function saveConfiguration() {
+        if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        var name = document.getElementById('username-input').value;
+        if(name) {
+            localStorage.setItem('app_user_name', name);
+            document.getElementById('user-greeting').innerText = "¡Hola, " + name + "!";
+        }
+        
+        localStorage.setItem('app_user_hours', JSON.stringify(listaHoras));
+        localStorage.setItem('app_sound_enabled', document.getElementById('sound-checkbox').checked);
+        localStorage.setItem('app_wakelock_enabled', document.getElementById('wakelock-checkbox').checked);
+        
+        document.getElementById('config-box').style.display = 'none';
+        
+        desbloquearAudioSistema();
+        requestWakeLock();
+        alert("¡Configuración guardada exitosamente!");
     }
 
     function showNotification() {
         var isSoundEnabled = localStorage.getItem('app_sound_enabled') !== 'false';
         
-        // 1. Intentar hacer sonar la campana inmediatamente
         if (isSoundEnabled) {
             desbloquearAudioSistema();
             playSynthesizedChime();
         }
 
-        // 2. Enviar la notificación visual
         if (window.Notification && Notification.permission === "granted") {
             var notif = new Notification("Momento de Conexión - God Willing", {
                 body: "Recuerda: eres un hijo amadísimo de Dios. Toca aquí para ver tu mensaje.",
-                icon: "logo.png",
-                requireInteraction: true // Fuerza a que la notificación no desaparezca sola
+                icon: "logo.png"
             });
-
-            // 3. Rescate: Si el navegador bloqueó el sonido, al hacer clic en la notificación sonará
             notif.onclick = function() {
-                window.focus(); // Trae la página al frente
+                window.focus();
                 if (isSoundEnabled) {
                     desbloquearAudioSistema();
                     playSynthesizedChime();
@@ -515,6 +468,120 @@
             };
         }
     }
+
+    function iniciarApp() {
+        // Cargar Nombre y decidir si se muestra la configuración
+        var savedName = localStorage.getItem('app_user_name');
+        if(savedName) {
+            document.getElementById('user-greeting').innerText = "¡Hola, " + savedName + "!";
+        } else {
+            document.getElementById('config-box').style.display = 'block';
+        }
+        
+        // Cargar Horas
+        var savedHours = localStorage.getItem('app_user_hours');
+        if(savedHours) {
+            listaHoras = JSON.parse(savedHours);
+            renderHoursTags();
+        }
+
+        // Cargar Checkboxes
+        var savedSound = localStorage.getItem('app_sound_enabled');
+        if(savedSound !== null) {
+            document.getElementById('sound-checkbox').checked = (savedSound === 'true');
+        }
+        var savedWakeLock = localStorage.getItem('app_wakelock_enabled');
+        if(savedWakeLock !== null) {
+            document.getElementById('wakelock-checkbox').checked = (savedWakeLock === 'true');
+        }
+
+        // Cargar JSON de oraciones
+        fetch('./oraciones.json')
+            .then(function(res) { return res.json(); })
+            .then(function(oraciones) {
+                var historialRaw = localStorage.getItem('app_historial_oraciones');
+                var historial = historialRaw ? JSON.parse(historialRaw) : [];
+                var disponibles = oraciones.filter(function(o) { return historial.indexOf(o.id) === -1; });
+                if (disponibles.length === 0) { historial = []; disponibles = oraciones; }
+                
+                var indiceAleatorio = Math.floor(Math.random() * disponibles.length);
+                var datosHoy = disponibles[indiceAleatorio];
+                
+                historial.push(datosHoy.id);
+                localStorage.setItem('app_historial_oraciones', JSON.stringify(historial));
+                
+                // Pintar datos seguros en pantalla
+                document.getElementById('text-llamada').innerText = '"' + (datosHoy.llamada || '') + '"';
+                
+                var fotoCentral = document.getElementById('main-inspiration-photo');
+                if (datosHoy.imagen && datosHoy.imagen.trim() !== "") {
+                    fotoCentral.src = datosHoy.imagen;
+                    fotoCentral.style.display = 'block';
+                }
+                
+                document.getElementById('text-oracion-central').innerHTML = datosHoy.palabra || '';
+                document.getElementById('content-luz').innerHTML = "<strong>Luz para hoy:</strong><br>" + (datosHoy.luz || '');
+                document.getElementById('content-oracion').innerHTML = "<strong>Oración:</strong><br>" + (datosHoy.oracion || '');
+                document.getElementById('content-examen').innerHTML = "<strong>Examen:</strong><br>" + (datosHoy.examen || '');
+                document.getElementById('content-intencion').innerHTML = "<strong>Intención:</strong><br>" + (datosHoy.intencion || '');
+            })
+            .catch(function(err) {
+                console.error("No se pudo cargar oraciones.json", err);
+                document.getElementById('text-llamada').innerText = '"Te tengo abrazado. Sigamos juntos."';
+                document.getElementById('text-oracion-central').innerHTML = "«Permaneced en mí, como yo en vosotros.»<br><small>(Juan 15,4)</small>";
+            });
+
+        // Reloj acelerado (10s)
+        setInterval(function() {
+            if (listaHoras.length > 0) {
+                var ahora = new Date();
+                var hrs = ahora.getHours();
+                var mins = ahora.getMinutes();
+                var horaActual = (hrs < 10 ? '0' + hrs : hrs) + ":" + (mins < 10 ? '0' + mins : mins);
+                
+                if (listaHoras.indexOf(horaActual) !== -1) {
+                    if (window.lastNotifiedMinute !== horaActual) {
+                        showNotification();
+                        window.lastNotifiedMinute = horaActual; 
+                    }
+                }
+            }
+        }, 10000);
+    }
+
+    // --- ASIGNACIÓN DE EVENTOS SEGUROS ---
+    
+    // DOMContentLoaded asegura que el código de JS no se ejecute hasta que toda la interfaz gráfica exista.
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Asignación de botones principales
+        document.getElementById('btn-open-config').addEventListener('click', function() {
+            var box = document.getElementById('config-box');
+            box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+        });
+        
+        document.getElementById('btn-add-hour').addEventListener('click', addHourToList);
+        document.getElementById('btn-test-sound').addEventListener('click', testSound);
+        document.getElementById('btn-save-config').addEventListener('click', saveConfiguration);
+
+        // Asignación de menús desplegables
+        ['luz', 'oracion', 'examen', 'intencion'].forEach(function(sec) {
+            document.getElementById('btn-' + sec).addEventListener('click', function() {
+                toggleContent(sec);
+            });
+        });
+
+        // Activar el motor de audio de fondo y mantener pantalla encendida si vuelves a la pestaña
+        document.body.addEventListener('click', desbloquearAudioSistema);
+        document.body.addEventListener('touchstart', desbloquearAudioSistema);
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'visible') requestWakeLock();
+        });
+
+        // Iniciar todo
+        iniciarApp();
+    });
+
 </script>
 
 </body>
